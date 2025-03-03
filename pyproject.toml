@@ -1,0 +1,20 @@
+[project]
+name = "HardHat"      
+version = "0.0.0"
+description = "python user interface for coreminer"
+authors = [
+    { name = "Christoph J. Scherr"},
+    { name = "Marco Ludwig"}
+]
+
+requires-python = ">=3.13"
+
+dependencies = [
+
+]
+
+[project.optional-dependencies]
+# development dependency groups
+dev = [
+
+]
