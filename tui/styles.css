@@ -1,0 +1,13 @@
+MainView {
+    padding: 1 2;
+}
+
+#command_input {
+    margin: 1 0;
+}
+
+#response_display {
+    border: solid white;
+    padding: 1;
+    height: auto;
+}
