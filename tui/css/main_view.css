@@ -1,0 +1,27 @@
+MainView {
+    padding: 1 2;
+}
+
+#command_input {
+    margin: 1 0;
+}
+
+#response_display {
+    border: solid white;
+    padding: 1;
+    height: auto;
+}
+
+#splitter {
+    height: 1fr;
+}
+
+#left_panel {
+    width: 2fr;  /* Make left panel initially larger */
+    border: heavy white;
+}
+
+#right_panel {
+    width: 1fr;  /* Right panel starts smaller */
+    border: heavy white;
+}

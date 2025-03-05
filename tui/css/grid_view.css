@@ -1,0 +1,33 @@
+Screen {
+    layout: grid;
+    grid-size: 12 13;
+}
+
+.main_window {
+    column-span: 6;
+    row-span: 12;
+    tint: magenta 40%;
+}
+
+.medium_window {
+    column-span: 6;
+    row-span: 7;
+    tint: orange 40%;
+}
+
+.small_window {
+    column-span: 3;
+    row-span: 5;
+    tint: green 40%;
+}
+
+.command_input {
+    column-span: 12;
+    row-span: 1;
+    tint: blue 40%;
+}
+
+.box {
+    height: 100%;
+    border: solid green;
+}
