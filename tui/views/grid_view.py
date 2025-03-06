@@ -1,7 +1,8 @@
 from textual.screen import Screen
 from textual.containers import Grid, Vertical
-from textual.widgets import Header, Footer, TabbedContent, TabPane, Static, Button
+from textual.widgets import Header, Footer, TabbedContent, TabPane, Static, Button, Input
 from textual.app import ComposeResult
+from..widgets.command_input import CommandInput
 
 class GridView(Screen):
     CSS_PATH = "../css/grid_view.css"
@@ -47,7 +48,12 @@ class GridView(Screen):
             with TabPane("\[+]", id="add_medium"):
                 yield Button("[+] Add Tab", id="add_medium_tabs")
 
-        yield Static("Command Input", classes="box command_input")
+        #yield Static("Command Input", classes="box command_input")
+        yield Input(
+            placeholder="Enter command...",
+            classes="box command_input",
+            id="command_input",
+        )
         yield Footer()
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
@@ -136,3 +142,24 @@ class GridView(Screen):
             Static(f"Content for {tab_name}\n"),
             Button("[x] Delete Tab", id=delete_button_id),
         )
+
+    def on_input_submitted(self, event: Input.Submitted) -> None:
+            """
+            Handle 'Enter' in any Input widget. We'll look for our 'command_input' ID
+            and process the command. This event is triggered automatically by Textual
+            when the user presses Enter in the Input field.
+            """
+            if event.input.id == "command_input":
+                command = event.value.strip()
+                if command:
+                    # Process the command however you like
+                    self.process_command(command)
+                # Clear the input field after pressing Enter
+                event.input.value = ""
+
+    def process_command(self, command: str) -> None:
+        """
+        Do whatever you need to handle the command typed by the user.
+        For now, we'll just print it to the console or do something else.
+        """
+        print(f"User command: {command}")
