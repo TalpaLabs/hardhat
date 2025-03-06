@@ -1,22 +1,29 @@
 from textual.screen import Screen
 from textual.containers import Grid, Vertical
-from textual.widgets import Header, Footer, TabbedContent, TabPane, Static, Button, Input
+from textual.widgets import (
+    Header,
+    Footer,
+    TabbedContent,
+    TabPane,
+    Static,
+    Button,
+    Input,
+)
 from textual.app import ComposeResult
-from..widgets.command_input import CommandInput
+from textual import events
 
 class GridView(Screen):
     CSS_PATH = "../css/grid_view.css"
 
     def __init__(self) -> None:
         super().__init__()
-        # Counters to give each dynamically created tab a unique name/ID
+        # Keep your tab counters and add_tab_map from earlier
         self.tab_counters = {
             "main_tabs": 0,
             "small_tabs_1": 0,
             "small_tabs_2": 0,
             "medium_tabs": 0,
         }
-        # Map each TabbedContent ID to the ID of its "Add" tab
         self.add_tab_map = {
             "main_tabs":    "add_main",
             "small_tabs_1": "add_small_1",
@@ -24,8 +31,12 @@ class GridView(Screen):
             "medium_tabs":  "add_medium",
         }
 
+        # Command history storage
+        self.command_history: list[str] = []
+        self.history_index: int = 0  # Will track which command in history is displayed
+
     def compose(self) -> ComposeResult:
-        """Creates UI layout"""
+        """Creates UI layout including an interactive command line at the bottom."""
         yield Header()
 
         # Main window
@@ -48,118 +59,118 @@ class GridView(Screen):
             with TabPane("\[+]", id="add_medium"):
                 yield Button("[+] Add Tab", id="add_medium_tabs")
 
-        #yield Static("Command Input", classes="box command_input")
+        # Command Line Input
         yield Input(
             placeholder="Enter command...",
             classes="box command_input",
             id="command_input",
         )
+
         yield Footer()
 
+    # -------------------------------------------------------------------------
+    # TAB ADD / DELETE LOGIC 
+    # -------------------------------------------------------------------------
     def on_button_pressed(self, event: Button.Pressed) -> None:
-        """Handle both '[+]' Add Tab and 'Delete' button presses."""
         button_id = event.button.id
-
         if button_id.startswith("add_"):
-            # Example: "add_main_tabs" -> tabbed_content_id = "main_tabs"
             tabbed_content_id = button_id.replace("add_", "")
             self.add_tab(tabbed_content_id)
         elif button_id.startswith("delete_"):
-            # Format we’ll use: "delete_{tabbed_content_id}_{tab_id}"
             self.delete_tab(button_id)
 
     def add_tab(self, tabbed_content_id: str) -> None:
-        """Dynamically insert a new tab BEFORE the '[+]' tab"""
         tabbed_content = self.query_one(f"#{tabbed_content_id}", TabbedContent)
 
-        # Increment counter for naming / ID
         self.tab_counters[tabbed_content_id] += 1
         counter_value = self.tab_counters[tabbed_content_id]
 
-        # Build the new tab's ID and title
         new_tab_id = f"{tabbed_content_id}_tab_{counter_value}"
         new_tab_name = f"Tab {counter_value}"
-
-        # We'll create the content for this tab, including a delete button
         new_tab_content = self._create_tab_content(tabbed_content_id, new_tab_id, new_tab_name)
 
-        # Insert the pane before the 'Add' tab so the 'Add' tab is always last
         add_tab_id = self.add_tab_map[tabbed_content_id]
         tabbed_content.add_pane(
             TabPane(new_tab_name, new_tab_content, id=new_tab_id),
             before=add_tab_id,
         )
-
-        # Activate the new tab
         tabbed_content.active = new_tab_id
 
     def delete_tab(self, delete_button_id: str) -> None:
-        """
-        Extract tabbed_content_id + tab_id from the delete button ID,
-        then remove that tab from the corresponding TabbedContent.
-        The button ID has the format: "delete_{tabbed_content_id}_{tab_id}"
-        """
-        # Example: delete_button_id = "delete_main_tabs_tab_3"
         remainder = delete_button_id[len("delete_"):]
-
-        # Find the tabbed_content_id among known IDs
+        
+        tabbed_content_id = None
+        tab_id = None
         for candidate_id in self.add_tab_map.keys():
             prefix = candidate_id + "_"
             if remainder.startswith(prefix):
-                # Found which candidate ID is used
                 tabbed_content_id = candidate_id
-                # The rest of the string after that prefix is the actual tab ID
                 tab_id = remainder[len(prefix):]
                 break
-        else:
-            # If none of the known IDs match as a prefix, something is off
+
+        if not tabbed_content_id or not tab_id:
             return
 
-        # Now we have tabbed_content_id = "main_tabs"
-        # and tab_id = "main_tabs_tab_3"
         tabbed_content = self.query_one(f"#{tabbed_content_id}", TabbedContent)
-
-        # Make sure we don't remove the "Add" tab by accident
         if tab_id == self.add_tab_map[tabbed_content_id]:
             return
 
-        # Remove the specified pane by ID
         tabbed_content.remove_pane(tab_id)
 
-
     def _create_tab_content(self, tabbed_content_id: str, tab_id: str, tab_name: str) -> Vertical:
-        """
-        Builds the content (widgets) inside the newly created tab, including
-        a Delete button that knows when clicked which TabbedContent ID and tab ID to remove.
-        """
-        # Our plan: nest a Static or a container widget that includes
-        # the text plus the button. We'll store the "delete" button ID
-        # in a known pattern so we can parse it in on_button_pressed.
         delete_button_id = f"delete_{tabbed_content_id}_{tab_id}"
-
-        # Use a Vertical container for the text and the delete button.
         return Vertical(
             Static(f"Content for {tab_name}\n"),
             Button("[x] Delete Tab", id=delete_button_id),
         )
 
+    # -------------------------------------------------------------------------
+    # COMMAND LINE LOGIC
+    # -------------------------------------------------------------------------
     def on_input_submitted(self, event: Input.Submitted) -> None:
-            """
-            Handle 'Enter' in any Input widget. We'll look for our 'command_input' ID
-            and process the command. This event is triggered automatically by Textual
-            when the user presses Enter in the Input field.
-            """
-            if event.input.id == "command_input":
-                command = event.value.strip()
-                if command:
-                    # Process the command however you like
-                    self.process_command(command)
-                # Clear the input field after pressing Enter
-                event.input.value = ""
+        """Called when user presses Enter in any Input widget."""
+        if event.input.id == "command_input":
+            command = event.value.strip()
+            if command:
+                self.process_command(command)
+            # Clear input
+            event.input.value = ""
+            # Reset the history_index to "end"
+            self.history_index = len(self.command_history)
 
     def process_command(self, command: str) -> None:
-        """
-        Do whatever you need to handle the command typed by the user.
-        For now, we'll just print it to the console or do something else.
-        """
+        """Handle the logic for a typed command."""
+        self.command_history.append(command)
         print(f"User command: {command}")
+
+    def on_key(self, event: events.Key) -> None:
+        """
+        Capture Up/Down arrow keys when the command_input is focused,
+        and cycle through command history.
+        """
+        # Chek that the command_input is focused
+        command_input = self.query_one("#command_input", Input)
+        if not command_input.has_focus:
+            return  # Only respond to arrow keys if the user is editing the command input
+
+        if event.key == "up":
+            event.stop()
+            # Move history index up if possible
+            if self.history_index > 0:
+                self.history_index -= 1
+
+            # If we have items in history, show them
+            if 0 <= self.history_index < len(self.command_history):
+                command_input.value = self.command_history[self.history_index]
+
+        elif event.key == "down":
+            event.stop()
+            # Move history index down if possible
+            if self.history_index < len(self.command_history):
+                self.history_index += 1
+
+            # If the index equals the length, clear the input
+            if self.history_index == len(self.command_history):
+                command_input.value = ""
+            else:
+                command_input.value = self.command_history[self.history_index]
