@@ -1,0 +1,19 @@
+/* If you want to style *all* modal screens: */
+ModalScreen {
+    dock: none;        /* So it appears over the entire app */
+    width: 60%;          /* 60% of the terminal width */
+    height: 50%;         /* 50% of the terminal height */
+    align: center middle;/* center horizontally and vertically */
+    layer: overlay;      /* ensure it's on top of main content */
+    border: round green; /* optional styling */
+}
+
+/* Or, style just this particular screen by referencing its class if you declared one */
+WidgetSelector {
+    dock: none;        /* So it appears over the entire app */
+    width: 60%;          /* 60% of the terminal width */
+    height: 50%;         /* 50% of the terminal height */
+    align: center middle;/* center horizontally and vertically */
+    layer: overlay;      /* ensure it's on top of main content */
+    border: round green; /* optional styling */
+}

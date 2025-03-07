@@ -1,16 +1,23 @@
 from textual.screen import Screen
-from textual.containers import Grid, Vertical
+from textual.app import ComposeResult
+from textual.events import Key
+from textual.containers import Vertical
 from textual.widgets import (
     Header,
     Footer,
+    Button,
+    Input,
     TabbedContent,
     TabPane,
     Static,
-    Button,
-    Input,
 )
-from textual.app import ComposeResult
-from textual import events
+from .widget_selector import WidgetSelector
+
+# Import your custom widgets (used if you want to manually instantiate them)
+from ..widgets.widget_a import WidgetA
+from ..widgets.widget_b import WidgetB
+from ..widgets.widget_c import WidgetC
+
 
 class GridView(Screen):
     CSS_PATH = "../css/grid_view.css"
@@ -68,40 +75,120 @@ class GridView(Screen):
 
         yield Footer()
 
-    # -------------------------------------------------------------------------
-    # TAB ADD / DELETE LOGIC 
-    # -------------------------------------------------------------------------
+    # ─────────────────────────────────────────────────────────────────────────
+    # EVENT HANDLERS
+    # ─────────────────────────────────────────────────────────────────────────
     def on_button_pressed(self, event: Button.Pressed) -> None:
+        """Handle '[+] Add Tab' buttons and any 'delete_*' buttons."""
         button_id = event.button.id
+
+        # If it's an "add_" button, open the WidgetSelector modal
         if button_id.startswith("add_"):
+            # e.g. "add_main_tabs" -> tabbed_content_id = "main_tabs"
             tabbed_content_id = button_id.replace("add_", "")
-            self.add_tab(tabbed_content_id)
+            self.app.push_screen(
+                WidgetSelector(),
+                callback=lambda choice: self._on_widget_choice(choice, tabbed_content_id)
+            )
+
         elif button_id.startswith("delete_"):
             self.delete_tab(button_id)
 
-    def add_tab(self, tabbed_content_id: str) -> None:
+    def on_key(self, event: Key) -> None:
+        """
+        Capture Up/Down arrow keys for the command_input
+        to allow cycling through command history.
+        """
+        # We'll only do this if the command_input is focused
+        command_input = self.query_one("#command_input", Input)
+        if not command_input.has_focus:
+            return
+
+        if event.key == "up":
+            event.stop()
+            if self.history_index > 0:
+                self.history_index -= 1
+            if 0 <= self.history_index < len(self.command_history):
+                command_input.value = self.command_history[self.history_index]
+        elif event.key == "down":
+            event.stop()
+            if self.history_index < len(self.command_history):
+                self.history_index += 1
+            if self.history_index == len(self.command_history):
+                command_input.value = ""
+            else:
+                command_input.value = self.command_history[self.history_index]
+
+    def on_input_submitted(self, event: Input.Submitted) -> None:
+        """Handle Enter in the command_input, storing commands in history."""
+        if event.input.id == "command_input":
+            command = event.value.strip()
+            if command:
+                self.process_command(command)
+            event.input.value = ""
+            self.history_index = len(self.command_history)
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # LOGIC FOR PROCESSING COMMANDS (IF YOU WANT TO TYPE STUFF IN THE BOX)
+    # ─────────────────────────────────────────────────────────────────────────
+    def process_command(self, command: str) -> None:
+        """Add your logic for commands typed by the user here."""
+        self.command_history.append(command)
+        print(f"User typed command: {command}")
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # ADD / DELETE TABS
+    # ─────────────────────────────────────────────────────────────────────────
+    def _on_widget_choice(self, choice: str | None, tabbed_content_id: str) -> None:
+        """
+        Called when the user closes the WidgetSelector modal.
+        `choice` is "WidgetA", "WidgetB", "WidgetC", or None if canceled.
+        """
+        if choice is not None:
+            self.add_tab(tabbed_content_id, choice)
+
+    def add_tab(self, tabbed_content_id: str, widget_name: str) -> None:
+        """Insert a new tab with the chosen widget, before the '[+]' tab."""
+        if tabbed_content_id not in self.add_tab_map:
+            print(f"No such tabbed content: {tabbed_content_id}")
+            return
+
         tabbed_content = self.query_one(f"#{tabbed_content_id}", TabbedContent)
 
+        # Increment counter for naming/ID
         self.tab_counters[tabbed_content_id] += 1
         counter_value = self.tab_counters[tabbed_content_id]
-
         new_tab_id = f"{tabbed_content_id}_tab_{counter_value}"
         new_tab_name = f"Tab {counter_value}"
-        new_tab_content = self._create_tab_content(tabbed_content_id, new_tab_id, new_tab_name)
 
+        # Build the chosen widget
+        widget = self._create_widget(widget_name)
+
+        # Container with the widget + a delete button
+        delete_button_id = f"delete_{tabbed_content_id}_{new_tab_id}"
+        content_container = Vertical(
+            widget,
+            Button("[x] Delete Tab", id=delete_button_id),
+        )
+
+        # Insert before the "[+]" tab
         add_tab_id = self.add_tab_map[tabbed_content_id]
         tabbed_content.add_pane(
-            TabPane(new_tab_name, new_tab_content, id=new_tab_id),
+            TabPane(new_tab_name, content_container, id=new_tab_id),
             before=add_tab_id,
         )
         tabbed_content.active = new_tab_id
 
     def delete_tab(self, delete_button_id: str) -> None:
-        remainder = delete_button_id[len("delete_"):]
-        
+        """
+        Remove a tab, given the button ID "delete_{tabbed_content_id}_{tab_id}".
+        E.g.: "delete_main_tabs_main_tabs_tab_3"
+        """
+        remainder = delete_button_id.removeprefix("delete_")
+
         tabbed_content_id = None
         tab_id = None
-        for candidate_id in self.add_tab_map.keys():
+        for candidate_id in self.add_tab_map:
             prefix = candidate_id + "_"
             if remainder.startswith(prefix):
                 tabbed_content_id = candidate_id
@@ -111,66 +198,25 @@ class GridView(Screen):
         if not tabbed_content_id or not tab_id:
             return
 
-        tabbed_content = self.query_one(f"#{tabbed_content_id}", TabbedContent)
+        # Make sure we don't remove the "[+]" tab
         if tab_id == self.add_tab_map[tabbed_content_id]:
             return
 
+        # Remove the pane
+        tabbed_content = self.query_one(f"#{tabbed_content_id}", TabbedContent)
         tabbed_content.remove_pane(tab_id)
 
-    def _create_tab_content(self, tabbed_content_id: str, tab_id: str, tab_name: str) -> Vertical:
-        delete_button_id = f"delete_{tabbed_content_id}_{tab_id}"
-        return Vertical(
-            Static(f"Content for {tab_name}\n"),
-            Button("[x] Delete Tab", id=delete_button_id),
-        )
-
-    # -------------------------------------------------------------------------
-    # COMMAND LINE LOGIC
-    # -------------------------------------------------------------------------
-    def on_input_submitted(self, event: Input.Submitted) -> None:
-        """Called when user presses Enter in any Input widget."""
-        if event.input.id == "command_input":
-            command = event.value.strip()
-            if command:
-                self.process_command(command)
-            # Clear input
-            event.input.value = ""
-            # Reset the history_index to "end"
-            self.history_index = len(self.command_history)
-
-    def process_command(self, command: str) -> None:
-        """Handle the logic for a typed command."""
-        self.command_history.append(command)
-        print(f"User command: {command}")
-
-    def on_key(self, event: events.Key) -> None:
-        """
-        Capture Up/Down arrow keys when the command_input is focused,
-        and cycle through command history.
-        """
-        # Chek that the command_input is focused
-        command_input = self.query_one("#command_input", Input)
-        if not command_input.has_focus:
-            return  # Only respond to arrow keys if the user is editing the command input
-
-        if event.key == "up":
-            event.stop()
-            # Move history index up if possible
-            if self.history_index > 0:
-                self.history_index -= 1
-
-            # If we have items in history, show them
-            if 0 <= self.history_index < len(self.command_history):
-                command_input.value = self.command_history[self.history_index]
-
-        elif event.key == "down":
-            event.stop()
-            # Move history index down if possible
-            if self.history_index < len(self.command_history):
-                self.history_index += 1
-
-            # If the index equals the length, clear the input
-            if self.history_index == len(self.command_history):
-                command_input.value = ""
-            else:
-                command_input.value = self.command_history[self.history_index]
+    # ─────────────────────────────────────────────────────────────────────────
+    # FACTORY FOR CUSTOM WIDGETS
+    # ─────────────────────────────────────────────────────────────────────────
+    def _create_widget(self, widget_name: str):
+        """Return an instance of the selected widget by name."""
+        lower = widget_name.lower()
+        if lower == "widgeta":
+            return WidgetA()
+        elif lower == "widgetb":
+            return WidgetB()
+        elif lower == "widgetc":
+            return WidgetC()
+        else:
+            return Static(f"Unknown widget: {widget_name}")
