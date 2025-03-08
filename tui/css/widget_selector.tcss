@@ -1,0 +1,50 @@
+/* ../css/widget_selector.tcss */
+
+WidgetSelector {
+    align: center middle; /* Center the modal */
+    grid-size: 10 10;
+}
+
+#dialog {
+    grid-size: 1 10;
+    column-span: 4;
+    row-span: 7;
+    padding: 1 2;
+    border: thick $background 80%;
+    background: $surface;
+    content-align: center middle;
+}
+
+#selector_title {
+    row-span: 2;
+    text-align: center;
+    width: 100%;
+    text-style: bold;
+}
+
+#widget_list {
+    width: 100%;
+    margin: 1;
+    row-span: 6;
+}
+
+ListItem {
+    text-align: center;
+    padding: 1;
+    height: 3;
+}
+
+ListItem:hover {
+    background: purple;
+    color: black;
+    text-style: bold;
+}
+
+ListItem:focus {
+    border: thick purple;
+}
+
+#cancel {
+    width: 100%;
+    row-span: 2;
+}

@@ -1,28 +1,34 @@
 from textual.screen import ModalScreen
 from textual.app import ComposeResult
-from textual.widgets import Static, ListView, ListItem
+from textual.containers import Grid
+from textual.widgets import Static, ListView, ListItem, Button
 
 class WidgetSelector(ModalScreen[str]):
-    CSS_PATH = "../css/widget_selector.css"
+    """Modal popup for selecting a widget."""
+    
+    CSS_PATH = "../css/widget_selector.tcss"
 
     def compose(self) -> ComposeResult:
-        yield Static("Choose a widget to add:", id="selector_title")
-        yield ListView(id="widget_list")  # just yield the empty list for now
+        yield Grid(
+            Static("Choose a widget to add:", id="selector_title"),
+            ListView(id="widget_list"),  # Empty list at first
+            Button("Cancel", variant="primary", id="cancel"),
+            id="dialog",
+        )
 
     def on_mount(self) -> None:
-        """
-        Called after the WidgetSelector is mounted, so now we can safely append items 
-        without triggering the 'Can't mount before <widget> is mounted' error.
-        """
+        """Add list items after the screen is mounted."""
         list_view = self.query_one("#widget_list", ListView)
         list_view.append(ListItem(Static("WidgetA"), id="WidgetA"))
         list_view.append(ListItem(Static("WidgetB"), id="WidgetB"))
         list_view.append(ListItem(Static("WidgetC"), id="WidgetC"))
 
     def on_list_view_selected(self, event: ListView.Selected) -> None:
+        """Close modal and return the selected widget."""
         choice = event.item.id
         self.dismiss(choice)
 
-    def on_dismiss(self) -> None:
-        if not self._is_result_set:
-            self.dismiss(None)
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        """Handle button presses."""
+        if event.button.id == "cancel":
+            self.dismiss(None)  # Close without selecting

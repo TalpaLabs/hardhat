@@ -20,7 +20,7 @@ from ..widgets.widget_c import WidgetC
 
 
 class GridView(Screen):
-    CSS_PATH = "../css/grid_view.css"
+    CSS_PATH = "../css/grid_view.tcss"
 
     def __init__(self) -> None:
         super().__init__()
@@ -48,22 +48,22 @@ class GridView(Screen):
 
         # Main window
         with TabbedContent(initial="add_main", id="main_tabs", classes="box main_window"):
-            with TabPane("\[+]", id="add_main"):
+            with TabPane("\\[+]", id="add_main"):
                 yield Button("[+] Add Tab", id="add_main_tabs")
 
         # Small window #1
         with TabbedContent(initial="add_small_1", id="small_tabs_1", classes="box small_window"):
-            with TabPane("\[+]", id="add_small_1"):
+            with TabPane("\\[+]", id="add_small_1"):
                 yield Button("[+] Add Tab", id="add_small_tabs_1")
 
         # Small window #2
         with TabbedContent(initial="add_small_2", id="small_tabs_2", classes="box small_window"):
-            with TabPane("\[+]", id="add_small_2"):
+            with TabPane("\\[+]", id="add_small_2"):
                 yield Button("[+] Add Tab", id="add_small_tabs_2")
 
         # Medium window
         with TabbedContent(initial="add_medium", id="medium_tabs", classes="box medium_window"):
-            with TabPane("\[+]", id="add_medium"):
+            with TabPane("\\[+]", id="add_medium"):
                 yield Button("[+] Add Tab", id="add_medium_tabs")
 
         # Command Line Input
@@ -159,7 +159,7 @@ class GridView(Screen):
         self.tab_counters[tabbed_content_id] += 1
         counter_value = self.tab_counters[tabbed_content_id]
         new_tab_id = f"{tabbed_content_id}_tab_{counter_value}"
-        new_tab_name = f"Tab {counter_value}"
+        new_tab_name = f"{widget_name}"
 
         # Build the chosen widget
         widget = self._create_widget(widget_name)
