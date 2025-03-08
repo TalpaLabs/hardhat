@@ -16,7 +16,7 @@ WidgetSelector {
 }
 
 #selector_title {
-    row-span: 2;
+    row-span: 1;
     text-align: center;
     width: 100%;
     text-style: bold;
@@ -25,7 +25,7 @@ WidgetSelector {
 #widget_list {
     width: 100%;
     margin: 1;
-    row-span: 6;
+    row-span: 7;
 }
 
 ListItem {
