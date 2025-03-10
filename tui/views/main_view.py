@@ -152,9 +152,9 @@ class MainView(Screen):
     # LOGIC FOR PROCESSING COMMANDS
     # ─────────────────────────────────────────────────────────────────────────
     def process_command(self, command: str) -> None:
-        """Add your logic for commands typed by the user here."""
+        """Append Command to history and send """
         self.command_history.append(command)
-        self.process.send_command(command)
+        self.process.parse_command(command)
         
 
     # ─────────────────────────────────────────────────────────────────────────
