@@ -22,6 +22,7 @@ class WidgetSelector(ModalScreen[str]):
         list_view.append(ListItem(Static("WidgetA"), id="WidgetA"))
         list_view.append(ListItem(Static("WidgetB"), id="WidgetB"))
         list_view.append(ListItem(Static("WidgetC"), id="WidgetC"))
+        list_view.append(ListItem(Static("ResponseDisplay"), id="ResponseDisplay"))
 
     def on_list_view_selected(self, event: ListView.Selected) -> None:
         """Close modal and return the selected widget."""
