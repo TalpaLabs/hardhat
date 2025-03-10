@@ -1,3 +1,4 @@
+import shlex
 import subprocess
 import json
 import threading
@@ -13,31 +14,80 @@ class CoreMinerProcess:
             stderr=subprocess.PIPE, 
             text=True
         )
-        self.queue = Queue()
+        self.queue_feedback = Queue()
+        self.queue_output = Queue()
         threading.Thread(target=self._read_output, daemon=True).start()
 
     def _read_output(self):
         """Reads output from CoreMiner and stores it in a queue."""
         while True:
             if self.process.stdout:
-                line = self.process.stdout.readline().strip()
-                if line:
+                line_stdout = self.process.stdout.readline().strip()
+                line_stderr = self.process.stderr.readline().strip()
+                if line_stdout:
                     try:
                         # Try to parse as JSON
-                        self.queue.put(json.loads(line))
+                        self.queue_feedback.put(json.loads(line_stdout))
                     except json.JSONDecodeError:
                         # If not JSON, store as a regular string
-                        self.queue.put(line)
+                        self.queue_feedback.put(line_stdout)
+                    except Exception as e:
+                        print(e)
 
-    def send_command(self, command: str):
+                if line_stderr:
+                    try:
+                        # Try to parse as JSON
+                        self.queue_feedback.put(json.loads(line_stderr))
+                    except json.JSONDecodeError:
+                        # If not JSON, store as a regular string
+                        self.queue_feedback.put(line_stderr)
+                    except Exception as e:
+                        print(e)
+
+    def parse_command(self, command: str):
+        """
+        Turn a user-typed command like:
+        "SetBreakPoint 0xDEADBEEF"
+        into JSON like:
+        {"status": {"SetBreakPoint": 3735928559}}
+        """
+        tokens = shlex.split(command)
+        if not tokens:
+            return ""
+
+        cmd = tokens[0].lower()
+        args = tokens[1:]
+
+        # Dispatch table: keys are command names,
+        # values are functions that return a dict
+        command_table = {
+            "procmap":       lambda args: {"status": "ProcMap"},
+            "backtrace":     lambda args: {"status": "Backtrace"},
+            "continue":      lambda args: {"status": "Continue"},
+            #"setbreakpoint": parse_setbreakpoint,
+            #"run":           parse_run,
+            # ...
+        }
+
+        if cmd not in command_table:
+            # Unknown command
+            self.send_command(json.dumps({"status": f"Unknown command: {tokens[0]}"}))
+            return
+
+        # Call the function to build a dict
+        result_dict = command_table[cmd](args)
+        self.send_command(json.dumps(result_dict))
+        return 
+
+
+    def send_command(self, json_command):
         """Sends a JSON command to the CoreMiner."""
         if self.process.stdin:
-            json_data = json.dumps({"status": f"{command}"}) + "\n"
-            self.process.stdin.write(json_data)
+            self.process.stdin.write(json_command)
             self.process.stdin.flush()
 
     def get_response(self):
         """Retrieves a response from the queue."""
-        if not self.queue.empty():
-            return self.queue.get()
+        if not self.queue_feedback.empty():
+            return self.queue_feedback.get()
         return None
