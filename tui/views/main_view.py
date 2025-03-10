@@ -25,7 +25,7 @@ from ..widgets.display_response import ResponseDisplay
 
 
 class MainView(Screen):
-    CSS_PATH = "../css/grid_view.tcss"
+    CSS_PATH = "../css/main_view.tcss"
 
     def __init__(self) -> None:
         super().__init__()
