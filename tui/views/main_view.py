@@ -86,14 +86,15 @@ class MainView(Screen):
     def on_mount(self):
         """Initialize CoreMiner process."""
         self.process = CoreMinerProcess()
-        self.set_interval(0.5, self.check_coreminer_output)
+        self.set_interval(0.1, self.check_coreminer_output)
 
     def check_coreminer_output(self):
         """Polls CoreMiner for responses."""
         response = self.process.get_response()
         if response:
             try:
-                self.query_one(ResponseDisplay).update_response(response)
+                self.update_all_widgets(response)
+                #self.query_one(ResponseDisplay).update_response(response)
             except Exception as e:
                 print(e)
                 pass
@@ -228,7 +229,7 @@ class MainView(Screen):
         tabbed_content.remove_pane(tab_id)
 
     # ─────────────────────────────────────────────────────────────────────────
-    # FACTORY FOR CUSTOM WIDGETS
+    # FACTORY FOR WIDGETS & Udaten the Content
     # ─────────────────────────────────────────────────────────────────────────
     def _create_widget(self, widget_name: str):
         """Return an instance of the selected widget by name."""
@@ -243,3 +244,26 @@ class MainView(Screen):
             return ResponseDisplay()
         else:
             return Static(f"Unknown widget: {widget_name}")
+
+    def update_all_widgets(self, message) -> None:
+        """
+        Use queries to locate every TabPane (besides the '[+]' tab), then
+        find any child widget with an 'update_content()' method and call it.
+        """
+        for tabbed_content_id, plus_tab_id in self.add_tab_map.items():
+            # Get the TabbedContent by its ID
+            tabbed_content = self.query_one(f"#{tabbed_content_id}", expect_type=TabbedContent)
+
+            # Query for all TabPane children in this TabbedContent
+            panes = tabbed_content.query("TabPane")
+
+            for pane in panes:
+                # Skip the '[+]' tab by comparing pane.id to plus_tab_id
+                if pane.id == plus_tab_id:
+                    continue
+
+                # Inside this tab, find any widget with an update_content() method
+                for child in pane.query():
+                    if hasattr(child, "update") and callable(child.update_content):
+                        child.update_content(message)
+
