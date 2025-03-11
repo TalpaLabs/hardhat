@@ -75,8 +75,12 @@ class CoreMinerProcess:
         }
 
         if cmd not in command_table:
-            # Unknown command
-            self.send_command(json.dumps({"status": f"Unknown command: {tokens[0]}"}))
+            # Unknown command reurns to queue without sending the command to the CoreMiner
+            self.queue_feedback.put(json.dumps({
+                "status": "Unknown command",
+                "command": cmd,  
+                "arguments": args
+            }))
             return
 
         # Call the function to build a dict

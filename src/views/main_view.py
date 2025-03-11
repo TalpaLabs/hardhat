@@ -11,17 +11,18 @@ from textual.widgets import (
     TabPane,
     Static,
 )
+
 # Diferent Screens
-from .widget_selector import WidgetSelector
+from views.widget_selector import WidgetSelector
 
 #Coreminer API
-from ..coreminer_interface import CoreMinerProcess
+from coreminer_interface import CoreMinerProcess
 
-# Import your custom widgets (used if you want to manually instantiate them)
-from ..widgets.widget_a import WidgetA
-from ..widgets.widget_b import WidgetB
-from ..widgets.widget_c import WidgetC
-from ..widgets.display_response import ResponseDisplay
+# Import of custom widgets
+from widgets.widget_a import WidgetA
+from widgets.widget_b import WidgetB
+from widgets.widget_c import WidgetC
+from widgets.display_response import ResponseDisplay
 
 
 class MainView(Screen):

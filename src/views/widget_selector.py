@@ -30,6 +30,5 @@ class WidgetSelector(ModalScreen[str]):
         self.dismiss(choice)
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
-        """Handle button presses."""
-        if event.button.id == "cancel":
-            self.dismiss(None)  # Close without selecting
+        """Handle cancle button presses."""
+        self.dismiss(None)  # Close without selecting
