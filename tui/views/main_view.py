@@ -94,7 +94,6 @@ class MainView(Screen):
         if response:
             try:
                 self.update_all_widgets(response)
-                #self.query_one(ResponseDisplay).update_response(response)
             except Exception as e:
                 print(e)
                 pass
