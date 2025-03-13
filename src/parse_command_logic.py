@@ -1,5 +1,3 @@
-
-import json
 import shlex
 
 def parse_command_logic(command: str):
@@ -15,6 +13,13 @@ def parse_command_logic(command: str):
 
         cmd = tokens[0].lower()
         args = tokens[1:]
+
+        for i, arg in enumerate(args):
+            if arg.startswith("0x"):
+                try:
+                    args[i] = int(arg, 16)
+                except ValueError:
+                    pass
 
         # Dispatch table: command -> function returning a dict
         command_table = {
@@ -50,11 +55,24 @@ def parse_command_logic(command: str):
             "exit":          lambda args: {"status": "DebuggerQuit"},
             "q":             lambda args: {"status": "DebuggerQuit"},
 
-            "info":          lambda args: {"status": "Infos"},
+            #"info":          lambda args: {"status": "Infos"},
 
             # Complex commands
             "run":           parse_run,
-            # "setbreakpoint": parse_setbreakpoint, ...
+
+            "setbreakpoint": parse_setbreakpoint,
+            "bp":            parse_setbreakpoint,
+
+            "readmemory":    parse_readmemory,
+            "readmem":       parse_readmemory,
+            "rmem":          parse_readmemory,
+
+            "writememory":   parse_writememory,
+            "writemem":      parse_writememory,
+            "wmem":          parse_writememory,
+
+            "registers":      parse_registers,
+            "regs":           parse_registers,
         }
 
         if cmd not in command_table:
@@ -82,7 +100,7 @@ def parse_run(args: list[str]) -> dict:
     """
     if not args:
         result_dict = {
-            "feedback": {"Error":{"error_type": "command", "message": "Missing Arguments run PATH [ARGS]"}}
+            "feedback": {"Error":{"error_type": "command", "message": "Missing arguments - run PATH [ARGS]"}}
         }
         return result_dict
 
@@ -94,3 +112,82 @@ def parse_run(args: list[str]) -> dict:
         byte_args.append([b for b in arg.encode("utf-8")])
 
     return {"status": {"Run": [path, byte_args]}}
+
+def parse_setbreakpoint(args: list[str]):
+    if len(args) != 1:
+        result_dict = {
+            "feedback": {"Error":{"error_type": "command", "message": "Wrong argument number - bp ADDR"}}
+        }
+        return result_dict
+    
+    try:
+        address = int(args[0])
+    except:
+        result_dict = {
+            "feedback": {"Error":{"error_type": "command", "message": "Wrong argument number - bp ADDR"}}
+        }
+        return result_dict
+    return {"status": {"SetBreakpoint": int(address)}}
+
+def parse_readmemory(args: list[str]):
+    if len(args) != 1:
+        result_dict = {
+            "feedback": {"Error":{"error_type": "command", "message": "Invallid argument type - rmem ADDR"}}
+        }
+        return result_dict
+    try:
+        address = int(args[0])
+    except:
+        result_dict = {
+            "feedback": {"Error":{"error_type": "command", "message": "Wrong argument type - rmem ADDR"}}
+        }
+        return result_dict
+    return {"status": {"ReadMem": int(address)}}
+
+def parse_writememory(args: list[str]):
+    if len(args) != 2:
+        result_dict = {
+            "feedback": {"Error":{"error_type": "command", "message": "Wrong argument number - wmem ADDR VAL"}}
+        }
+        return result_dict
+    try:
+        address = int(args[0])
+        value = int(args[1])
+    except:
+        result_dict = {
+            "feedback": {"Error":{"error_type": "command", "message": "Invalid argument type - wmem ADDR VAL"}}
+        }
+        return result_dict
+    return {"status": {"WriteMem": [int(address), int(value)]}}
+
+def parse_registers(args: list[str]):
+
+    if len(args) == 1:
+        if args[0] == "get":
+            return {"status": "DumpRegisters"}
+        else:
+            result_dict = {
+            "feedback": {"Error":{"error_type": "command", "message": "Unknown argument! Did you mean 'regs get' or 'regs set REG VALUE'"}}
+            }
+            return result_dict
+    elif len(args) == 3:
+        if args[0] == "set":
+            try:
+                name = args[0]
+                value = int(args[1])
+            except:
+                result_dict = {
+                "feedback": {"Error":{"error_type": "command", "message": "Invalid argument type - wmem ADDR VAL"}}
+                }
+                return result_dict
+            return {"status": {"SetRegister": [name, value]}}
+        else:
+            result_dict = {
+            "feedback": {"Error":{"error_type": "command", "message": "Unknown argument! Did you mean 'regs get' or 'regs set REG VALUE'"}}
+            }
+            return result_dict
+    else:
+        result_dict = {
+            "feedback": {"Error":{"error_type": "command", "message": "Wrong argument number - regs get - regs set REG VALUE"}}
+        }
+        return result_dict
