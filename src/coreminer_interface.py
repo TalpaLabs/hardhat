@@ -63,30 +63,92 @@ class CoreMinerProcess:
         cmd = tokens[0].lower()
         args = tokens[1:]
 
-        # Dispatch table: keys are command names,
-        # values are functions that return a dict
+        # Dispatch table: command -> function returning a dict
         command_table = {
+            # Single-word commands
             "procmap":       lambda args: {"status": "ProcMap"},
+            "pm":            lambda args: {"status": "ProcMap"},
+
             "backtrace":     lambda args: {"status": "Backtrace"},
+            "bt":            lambda args: {"status": "Backtrace"},
+
             "continue":      lambda args: {"status": "Continue"},
-            #"setbreakpoint": parse_setbreakpoint,
-            #"run":           parse_run,
-            # ...
+            "cont":          lambda args: {"status": "Continue"},
+            "c":             lambda args: {"status": "Continue"},
+
+            "stepover":      lambda args: {"status": "StepOver"},
+            "sov":           lambda args: {"status": "StepOver"},
+
+            "stepout":       lambda args: {"status": "StepOut"},
+            "so":            lambda args: {"status": "StepOut"},
+
+            "stepinto":      lambda args: {"status": "StepInto"},
+            "si":            lambda args: {"status": "StepInto"},
+
+            "stepsingle":    lambda args: {"status": "StepSingle"},
+            "step":          lambda args: {"status": "StepSingle"},
+            "s":             lambda args: {"status": "StepSingle"},
+
+            "getstack":      lambda args: {"status": "GetStack"},
+            "stack":         lambda args: {"status": "GetStack"},
+
+            "debuggerquit":  lambda args: {"status": "DebuggerQuit"},
+            "quit":          lambda args: {"status": "DebuggerQuit"},
+            "exit":          lambda args: {"status": "DebuggerQuit"},
+            "q":             lambda args: {"status": "DebuggerQuit"},
+
+            "info":          lambda args: {"status": "Infos"},
+
+            # Complex commands
+            "run":           self.parse_run,
+            # "setbreakpoint": parse_setbreakpoint, ...
         }
 
         if cmd not in command_table:
-            # Unknown command reurns to queue without sending the command to the CoreMiner
+            # Unknown command: queue an error and exit
             self.queue_feedback.put(json.dumps({
-                "status": "Unknown command",
-                "command": cmd,  
-                "arguments": args
+                "feedback": {
+                    "Error": {
+                        "error_type": "command",
+                        "message": f"Unknown command: {cmd} {args}"
+                    }
+                }
             }))
             return
 
-        # Call the function to build a dict
-        result_dict = command_table[cmd](args)
+        # Call the parser function to build a dict
+        parse_func = command_table[cmd]
+        result_dict = parse_func(args)  # <--- CALL the function
+
+        # If the parser function returned None or an empty dict, do nothing
+        if not result_dict:
+            return
+
+        # If it returned an error with "feedback"
+        if "feedback" in result_dict:
+            self.queue_feedback.put(json.dumps(result_dict))
+            return
+
+        # Otherwise, it's a valid command
         self.send_command(json.dumps(result_dict))
         return 
+
+    
+    def parse_run(self, args: list[str]) -> dict:
+        """
+        "Run /bin/ls -la" -> 
+        {"status": {"Run": ["/bin/ls", [ [47,101,116,99], [45,108,97] ] ]}}
+        """
+        if not args:
+            self.queue_feedback.put(json.dumps({
+                "feedback": {"Error":{"error_type": "command", "message": "Missing Arguments run PATH [ARGS]"}}
+            }))
+            return
+
+        path = args[0]
+        rest   = args[1:] 
+
+        return {"status": {"Run": [path, rest]}}
 
     def send_command(self, json_command):
         """Sends a JSON command to the CoreMiner."""
