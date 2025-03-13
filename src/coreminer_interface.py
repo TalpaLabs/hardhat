@@ -6,6 +6,9 @@ from queue import Queue
 
 from parse_command_logic import parse_command_logic
 
+# Import parser logic
+from command_parser import CommandParser
+
 class CoreMinerProcess:
     def __init__(self):
         """Initialize the Rust process given a binary path."""
@@ -16,6 +19,8 @@ class CoreMinerProcess:
             stderr=subprocess.PIPE, 
             text=True
         )
+        self.command_parser = CommandParser()
+
         self.queue_feedback = Queue()
         self.queue_output = Queue()
         self.queue_stderr = Queue()
@@ -53,7 +58,7 @@ class CoreMinerProcess:
 
     def parse_command(self, command: str):
         """Parses the command, sends JSON to the Rust process if valid."""
-        result_dict = parse_command_logic(command)
+        result_dict = self.command_parser.parse(command)
         if result_dict:
             # If the parser returned a dict, let's see if it has an error
             if "feedback" in result_dict:
