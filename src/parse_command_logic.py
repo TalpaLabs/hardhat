@@ -77,7 +77,7 @@ def parse_command_logic(command: str):
 
 def parse_run(args: list[str]) -> dict:
     """
-    "Run /bin/ls -la" -> 
+    "Run /bin/ls /etc -la" -> 
     {"status": {"Run": ["/bin/ls", [ [47,101,116,99], [45,108,97] ] ]}}
     """
     if not args:
@@ -87,6 +87,10 @@ def parse_run(args: list[str]) -> dict:
         return result_dict
 
     path = args[0]
-    rest = args[1:] 
+    extras = args[1:] 
 
-    return {"status": {"Run": [path, rest]}}
+    byte_args = []
+    for arg in extras:
+        byte_args.append([b for b in arg.encode("utf-8")])
+
+    return {"status": {"Run": [path, byte_args]}}
