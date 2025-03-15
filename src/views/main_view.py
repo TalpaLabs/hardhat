@@ -1,7 +1,7 @@
 from textual.screen import Screen
 from textual.app import ComposeResult
 from textual.events import Key
-from textual.containers import Vertical
+from textual.containers import ScrollableContainer, VerticalScroll
 from textual.widgets import (
     Header,
     Footer,
@@ -60,22 +60,22 @@ class MainView(Screen):
         # Main window
         with TabbedContent(initial="add_main", id="main_tabs", classes="box main_window"):
             with TabPane("\\[+]", id="add_main"):
-                yield Button("[+] Add Tab", id="add_main_tabs")
+                yield Button("Add Tab", id="add_main_tabs")
 
         # Small window #1
         with TabbedContent(initial="add_small_1", id="small_tabs_1", classes="box small_window"):
             with TabPane("\\[+]", id="add_small_1"):
-                yield Button("[+] Add Tab", id="add_small_tabs_1")
+                yield Button("Add Tab", id="add_small_tabs_1")
 
         # Small window #2
         with TabbedContent(initial="add_small_2", id="small_tabs_2", classes="box small_window"):
             with TabPane("\\[+]", id="add_small_2"):
-                yield Button("[+] Add Tab", id="add_small_tabs_2")
+                yield Button("Add Tab", id="add_small_tabs_2")
 
         # Medium window
         with TabbedContent(initial="add_medium", id="medium_tabs", classes="box medium_window"):
             with TabPane("\\[+]", id="add_medium"):
-                yield Button("[+] Add Tab", id="add_medium_tabs")
+                yield Button("Add Tab", id="add_medium_tabs")
 
         # Command Line Input
         yield Input(
@@ -193,9 +193,11 @@ class MainView(Screen):
 
         # Container with the widget + a delete button
         delete_button_id = f"delete_{tabbed_content_id}_{new_tab_id}"
-        content_container = Vertical(
-            widget,
-            Button("[x] Delete Tab", id=delete_button_id),
+        content_container = ScrollableContainer(
+            VerticalScroll(
+            widget
+            ),
+            Button("Close Tab",  id=delete_button_id),
         )
 
         # Insert before the "[+]" tab
