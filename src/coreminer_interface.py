@@ -1,4 +1,3 @@
-import shlex
 import subprocess
 import json
 import threading
@@ -38,9 +37,6 @@ class CoreMinerProcess:
                     try:
                         # Try to parse as JSON
                         self.queue_feedback.put(json.loads(line_stdout))
-                    except json.JSONDecodeError:
-                        # If not JSON, store as a regular string
-                        self.queue_output.put(line_stdout)
                     except Exception as e:
                         print(e)
 
@@ -82,8 +78,8 @@ class CoreMinerProcess:
         we parse it using the FeedbackParser, which in turn updates the data store.
         """
         if not self.queue_feedback.empty():
-            raw_data = self.queue_feedback.get()
+            feedback = self.queue_feedback.get()
             # Use the FeedbackParser to handle the data + update the store
-            self.feedback_parser.parse_feedback(raw_data)
+            self.feedback_parser.parse_feedback(feedback)
             return True
         return False
