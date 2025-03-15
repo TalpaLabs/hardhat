@@ -4,8 +4,6 @@ import json
 import threading
 from queue import Queue
 
-from parse_command_logic import parse_command_logic
-
 # Import parser logic
 from command_parser import CommandParser
 
