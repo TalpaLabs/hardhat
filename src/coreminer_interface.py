@@ -6,9 +6,10 @@ from queue import Queue
 
 # Import parser logic
 from command_parser import CommandParser
+from feedback_parser import FeedbackParser
 
 class CoreMinerProcess:
-    def __init__(self):
+    def __init__(self, data_store):
         """Initialize the Rust process given a binary path."""
         self.process = subprocess.Popen(
             ["cmserve"], 
@@ -17,7 +18,11 @@ class CoreMinerProcess:
             stderr=subprocess.PIPE, 
             text=True
         )
+
+        self.data_store = data_store
+
         self.command_parser = CommandParser()
+        self.feedback_parser = FeedbackParser(self.data_store)
 
         self.queue_feedback = Queue()
         self.queue_output = Queue()
@@ -72,7 +77,13 @@ class CoreMinerProcess:
             self.process.stdin.flush()
 
     def get_response(self):
-        """Retrieves a response from the queue."""
+        """
+        Retrieves a response from the queue. Whenever there's something in queue_feedback,
+        we parse it using the FeedbackParser, which in turn updates the data store.
+        """
         if not self.queue_feedback.empty():
-            return self.queue_feedback.get()
-        return None
+            raw_data = self.queue_feedback.get()
+            # Use the FeedbackParser to handle the data + update the store
+            self.feedback_parser.parse_feedback(raw_data)
+            return True
+        return False

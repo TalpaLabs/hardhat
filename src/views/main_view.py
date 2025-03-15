@@ -18,6 +18,9 @@ from views.widget_selector import WidgetSelector
 #Coreminer API
 from coreminer_interface import CoreMinerProcess
 
+# Central Data Store
+from data_store import DataStore
+
 # Import of custom widgets
 from widgets.widget_a import WidgetA
 from widgets.widget_b import WidgetB
@@ -47,6 +50,8 @@ class MainView(Screen):
         # Command history storage
         self.command_history: list[str] = []
         self.history_index: int = 0  # Will track which command in history is displayed
+
+        self.data_store = DataStore()
 
     def compose(self) -> ComposeResult:
         """Creates UI layout including an interactive command line at the bottom."""
@@ -86,7 +91,7 @@ class MainView(Screen):
     # ─────────────────────────────────────────────────────────────────────────
     def on_mount(self):
         """Initialize CoreMiner process."""
-        self.process = CoreMinerProcess()
+        self.process = CoreMinerProcess(self.data_store)
         self.set_interval(0.1, self.check_coreminer_output)
 
     def check_coreminer_output(self):
@@ -94,7 +99,7 @@ class MainView(Screen):
         response = self.process.get_response()
         if response:
             try:
-                self.update_all_widgets(response)
+                self.update_all_widgets()
             except Exception as e:
                 print(e)
                 pass
@@ -245,7 +250,7 @@ class MainView(Screen):
         else:
             return Static(f"Unknown widget: {widget_name}")
 
-    def update_all_widgets(self, message) -> None:
+    def update_all_widgets(self) -> None:
         """
         Use queries to locate every TabPane (besides the '[+]' tab), then
         find any child widget with an 'update_content()' method and call it.
@@ -265,5 +270,5 @@ class MainView(Screen):
                 # Inside this tab, find any widget with an update_content() method
                 for child in pane.query():
                     if hasattr(child, "update") and callable(child.update_content):
-                        child.update_content(message)
+                        child.update_content()
 
