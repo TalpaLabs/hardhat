@@ -41,7 +41,7 @@ class CoreMinerProcess:
                         # Try to parse as JSON
                         self.queue_feedback.put(json.loads(line_stdout))
                     except Exception as e:
-                        print(e)
+                        self.queue_output.put(str(line_stdout))
 
     def _read_stderr(self):
         """Reads output from CoreMiner and stores it in a queue."""
@@ -97,7 +97,12 @@ class CoreMinerProcess:
                 while not self.queue_commands.empty():
                     self.queue_commands.get() 
                 self.command_finished = True
-                return True   
+                return True
+        if not self.queue_output.empty():
+            output = self.queue_output.get()
+            self.data_store.set_debuggee_output(output)
+            if self.queue_output.empty():
+                return True
         return False
     
     def reload_basic_info(self):
