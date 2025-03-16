@@ -10,6 +10,8 @@ class DataStore:
         self.responses_coreminer: Optional[str] = None
         self.registers = ""
         self.stack = ""
+        self.rip = ""
+        self.debuggee_output = ""
 
     def set_responses_coreminer(self, response: str) -> None:
         """Appends the new response instead of replacing."""
@@ -34,3 +36,14 @@ class DataStore:
 
     def get_stack(self) -> str:
         return self.stack
+    
+    def set_debuggee_output(self, response: str) -> None:
+        """Appends the new response instead of replacing."""
+        if self.debuggee_output:
+            self.debuggee_output += f"\n{response}"
+        else:
+            self.debuggee_output = response
+
+    def get_debuggee_output(self) -> str:
+        """Retrieve the latest response."""
+        return self.debuggee_output
