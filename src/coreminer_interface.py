@@ -19,6 +19,7 @@ class CoreMinerProcess:
         )
 
         self.data_store = data_store
+        self.command_finished = True
 
         self.command_parser = CommandParser()
         self.feedback_parser = FeedbackParser(self.data_store)
@@ -26,8 +27,10 @@ class CoreMinerProcess:
         self.queue_feedback = Queue()
         self.queue_output = Queue()
         self.queue_stderr = Queue()
+        self.queue_commands = Queue()
         threading.Thread(target=self._read_stdout, daemon=True).start()
         threading.Thread(target=self._read_stderr, daemon=True).start()
+        threading.Thread(target=self._send_command, daemon=True).start()
     def _read_stdout(self):
         """Reads output from CoreMiner and stores it in a queue."""
         while True:
@@ -57,20 +60,26 @@ class CoreMinerProcess:
 
     def parse_command(self, command: str):
         """Parses the command, sends JSON to the Rust process if valid."""
-        result_dict = self.command_parser.parse(command)
+        result_dict, reload_basic_info = self.command_parser.parse(command)
         if result_dict:
-            # If the parser returned a dict, let's see if it has an error
+            # If the parser returned a dict, let's see if it has an error --> returna feedback
             if "feedback" in result_dict:
                 self.queue_feedback.put(result_dict)
             else:
                 # Otherwise send to Rust
-                self.send_command(json.dumps(result_dict))
+                self.queue_commands.put((json.dumps(result_dict)))
+                if reload_basic_info == True:
+                    self.reload_basic_info()
 
-    def send_command(self, json_command):
+    def _send_command(self):
         """Sends a JSON command to the CoreMiner."""
-        if self.process.stdin:
-            self.process.stdin.write(json_command + "\n")
-            self.process.stdin.flush()
+        while True:
+            if self.process.stdin:
+                if not self.queue_commands.empty() and self.command_finished == True:
+                    command = self.queue_commands.get()
+                    self.process.stdin.write(command + "\n")
+                    self.process.stdin.flush()
+                    self.command_finished = False
 
     def get_response(self):
         """
@@ -79,6 +88,19 @@ class CoreMinerProcess:
         """
         if not self.queue_feedback.empty():
             feedback = self.queue_feedback.get()
-            self.feedback_parser.parse_feedback(feedback)
-            return True
+            executed_successfull = self.feedback_parser.parse_feedback(feedback)
+            if executed_successfull:
+                self.command_finished = True
+                if self.queue_commands.empty():
+                    return True
+            else:  
+                while not self.queue_commands.empty():
+                    self.queue_commands.get() 
+                self.command_finished = True
+                return True   
         return False
+    
+    def reload_basic_info(self):
+        self.queue_commands.put((json.dumps({"status": "DumpRegisters"})))
+        self.queue_commands.put((json.dumps({"status": "GetStack"})))
+        return
