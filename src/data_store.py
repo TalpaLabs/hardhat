@@ -8,6 +8,7 @@ class DataStore:
 
     def __init__(self):
         self.responses_coreminer: Optional[str] = None
+        self.registers = ""
 
     def set_responses_coreminer(self, response: str) -> None:
         """Appends the new response instead of replacing."""
@@ -19,3 +20,10 @@ class DataStore:
     def get_responses_coreminer(self) -> Optional[str]:
         """Retrieve the latest response."""
         return self.responses_coreminer
+    
+    def set_registers(self, response: str) -> None:
+        self.registers = response
+
+    def get_registers(self) -> Optional[str]:
+        """Retrieve the latest response."""
+        return self.registers

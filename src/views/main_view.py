@@ -23,6 +23,7 @@ from data_store import DataStore
 
 # Import of custom widgets
 from widgets.raw_responses import RawResponses
+from widgets.registers import Registers
 
 
 class MainView(Screen):
@@ -237,9 +238,10 @@ class MainView(Screen):
     # ─────────────────────────────────────────────────────────────────────────
     def _create_widget(self, widget_name: str):
         """Return an instance of the selected widget by name."""
-        lower = widget_name.lower()
-        if lower == "rawresponses":
+        if widget_name == "RawResponses":
             return RawResponses(self.data_store)
+        elif widget_name == "Registers":
+            return Registers(self.data_store)
         else:
             return Static(f"Unknown widget: {widget_name}")
 
