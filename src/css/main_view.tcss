@@ -19,7 +19,7 @@ Screen {
 }
 
 .command_input {
-    column-span: 12;
+    column-span: 13;
     row-span: 1;
 }
 

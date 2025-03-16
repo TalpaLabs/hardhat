@@ -25,7 +25,8 @@ from data_store import DataStore
 from widgets.raw_responses import RawResponses
 from widgets.registers import Registers
 from widgets.stack import Stack
-from widgets.Output import Output
+from widgets.output import Output
+from widgets.disassembly import Disassembly
 
 
 class MainView(Screen):
@@ -244,6 +245,8 @@ class MainView(Screen):
             return Stack(self.data_store)
         elif widget_name == "Output":
             return Output(self.data_store)
+        elif widget_name == "Disassembly":
+            return Disassembly(self.data_store)
         else:
             return Static(f"Unknown widget: {widget_name}")
 
