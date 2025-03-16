@@ -22,7 +22,7 @@ from coreminer_interface import CoreMinerProcess
 from data_store import DataStore
 
 # Import of custom widgets
-from widgets.display_response import RawResponses
+from widgets.raw_responses import RawResponses
 
 
 class MainView(Screen):
