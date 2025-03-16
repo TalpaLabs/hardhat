@@ -20,6 +20,7 @@ class WidgetSelector(ModalScreen[str]):
         """Add list items after the screen is mounted."""
         list_view = self.query_one("#widget_list", ListView)
         list_view.append(ListItem(Static("Registers"), id="Registers"))
+        list_view.append(ListItem(Static("Stack"), id="Stack"))
         list_view.append(ListItem(Static("RawResponses"), id="RawResponses"))
 
     def on_list_view_selected(self, event: ListView.Selected) -> None:

@@ -9,6 +9,7 @@ class DataStore:
     def __init__(self):
         self.responses_coreminer: Optional[str] = None
         self.registers = ""
+        self.stack = ""
 
     def set_responses_coreminer(self, response: str) -> None:
         """Appends the new response instead of replacing."""
@@ -17,13 +18,19 @@ class DataStore:
         else:
             self.responses_coreminer = response
 
-    def get_responses_coreminer(self) -> Optional[str]:
+    def get_responses_coreminer(self) -> str:
         """Retrieve the latest response."""
         return self.responses_coreminer
     
     def set_registers(self, response: str) -> None:
         self.registers = response
 
-    def get_registers(self) -> Optional[str]:
+    def get_registers(self) -> str:
         """Retrieve the latest response."""
         return self.registers
+    
+    def set_stack(self, response: str) -> None:
+        self.stack = response
+
+    def get_stack(self) -> str:
+        return self.stack

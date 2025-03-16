@@ -24,6 +24,7 @@ from data_store import DataStore
 # Import of custom widgets
 from widgets.raw_responses import RawResponses
 from widgets.registers import Registers
+from widgets.stack import Stack
 
 
 class MainView(Screen):
@@ -96,11 +97,7 @@ class MainView(Screen):
         """Polls CoreMiner for responses."""
         response = self.process.get_response()
         if response:
-            try:
-                self.update_all_widgets()
-            except Exception as e:
-                print(e)
-                pass
+            self.update_all_widgets()
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handle '[+] Add Tab' buttons and any 'delete_*' buttons."""
@@ -242,6 +239,8 @@ class MainView(Screen):
             return RawResponses(self.data_store)
         elif widget_name == "Registers":
             return Registers(self.data_store)
+        elif widget_name == "Stack":
+            return Stack(self.data_store)
         else:
             return Static(f"Unknown widget: {widget_name}")
 

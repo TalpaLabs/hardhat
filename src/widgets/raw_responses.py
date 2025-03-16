@@ -1,5 +1,4 @@
 from textual.widgets import Static
-from textual.containers import VerticalScroll
 
 class RawResponses(Static):
     """Displays responses from CoreMiner"""

@@ -61,7 +61,7 @@ class CoreMinerProcess:
         if result_dict:
             # If the parser returned a dict, let's see if it has an error
             if "feedback" in result_dict:
-                self.queue_feedback.put(json.dumps(result_dict))
+                self.queue_feedback.put(result_dict)
             else:
                 # Otherwise send to Rust
                 self.send_command(json.dumps(result_dict))
@@ -79,7 +79,6 @@ class CoreMinerProcess:
         """
         if not self.queue_feedback.empty():
             feedback = self.queue_feedback.get()
-            # Use the FeedbackParser to handle the data + update the store
             self.feedback_parser.parse_feedback(feedback)
             return True
         return False
