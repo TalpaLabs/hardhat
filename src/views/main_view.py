@@ -22,10 +22,7 @@ from coreminer_interface import CoreMinerProcess
 from data_store import DataStore
 
 # Import of custom widgets
-from widgets.widget_a import WidgetA
-from widgets.widget_b import WidgetB
-from widgets.widget_c import WidgetC
-from widgets.display_response import ResponseDisplay
+from widgets.display_response import RawResponses
 
 
 class MainView(Screen):
@@ -241,14 +238,8 @@ class MainView(Screen):
     def _create_widget(self, widget_name: str):
         """Return an instance of the selected widget by name."""
         lower = widget_name.lower()
-        if lower == "widgeta":
-            return WidgetA()
-        elif lower == "widgetb":
-            return WidgetB()
-        elif lower == "widgetc":
-            return WidgetC()
-        elif lower == "responsedisplay":
-            return ResponseDisplay()
+        if lower == "rawresponses":
+            return RawResponses(self.data_store)
         else:
             return Static(f"Unknown widget: {widget_name}")
 

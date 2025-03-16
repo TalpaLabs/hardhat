@@ -11,7 +11,7 @@ class WidgetSelector(ModalScreen[str]):
     def compose(self) -> ComposeResult:
         yield Grid(
             Static("Choose a widget to add:", id="selector_title"),
-            ListView(id="widget_list"),  # Empty list at first
+            ListView(id="widget_list"),
             Button("Cancel", variant="primary", id="cancel"),
             id="dialog",
         )
@@ -19,10 +19,7 @@ class WidgetSelector(ModalScreen[str]):
     def on_mount(self) -> None:
         """Add list items after the screen is mounted."""
         list_view = self.query_one("#widget_list", ListView)
-        list_view.append(ListItem(Static("WidgetA"), id="WidgetA"))
-        list_view.append(ListItem(Static("WidgetB"), id="WidgetB"))
-        list_view.append(ListItem(Static("WidgetC"), id="WidgetC"))
-        list_view.append(ListItem(Static("ResponseDisplay"), id="ResponseDisplay"))
+        list_view.append(ListItem(Static("RawResponses"), id="RawResponses"))
 
     def on_list_view_selected(self, event: ListView.Selected) -> None:
         """Close modal and return the selected widget."""

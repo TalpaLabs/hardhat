@@ -7,10 +7,15 @@ class DataStore:
     """
 
     def __init__(self):
-        self.latest_response: Optional[str] = None
-        # Add any other shared data here, e.g.:
-        # self.user_info = {}
-        # self.some_list = []
+        self.responses_coreminer: Optional[str] = None
 
-    def set_latest_response(self, response: str) -> None:
-        self.latest_response = response
+    def set_responses_coreminer(self, response: str) -> None:
+        """Appends the new response instead of replacing."""
+        if self.responses_coreminer:
+            self.responses_coreminer += f"\n{response}"
+        else:
+            self.responses_coreminer = response
+
+    def get_responses_coreminer(self) -> Optional[str]:
+        """Retrieve the latest response."""
+        return self.responses_coreminer
