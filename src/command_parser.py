@@ -140,96 +140,96 @@ class CommandParser():
         try:
             args, optional_args = self.parser.parse_known_args(tokens)
         except SystemExit:
-            result_dict = {
+            result_dict = ({
                 "feedback": {
                     "Error": {
                         "error_type": "command",
                         "message": f"Unknown command: {input_string}"
                     }
                 }
-            }
+            }, False)
             return result_dict
 
         handler = self.command_handlers.get(args.command, self.handle_unknown)
         return handler(args, optional_args)
     
     def handle_procmap(self, args, optional_args):
-        return {"status": "ProcMap"}
+        return ({"status": "ProcMap"}, False)
     
     def handle_backtarce(self, args, optional_args):
-        return {"status": "BackTrace"}
+        return ({"status": "BackTrace"}, False)
     
     def handle_continue(self, args, optional_args):
-        return {"status": "Continue"}
+        return ({"status": "Continue"}, True)
     
     def handle_step_over(self, args, optional_args):
-        return {"status": "StepOver"}
+        return ({"status": "StepOver"}, True)
     
     def handle_step_out(self, args, optional_args):
-        return {"status": "StepOut"}
+        return ({"status": "StepOut"}, True)
     
     def handle_step_into(self, args, optional_args):
-        return {"status": "StepInto"}
+        return ({"status": "StepInto"}, True)
     
     def handle_step_single(self, args, optional_args):
-        return {"status": "StepSingle"}
+        return ({"status": "StepSingle"}, True)
     
     def handle_get_stack(self, args, optional_args):
-        return {"status": "GetStack"}
+        return ({"status": "GetStack"}, False)
     
     def handle_quit(self, args, optional_args):
         # Todo 
-        return {"status": "DebuggerQuit"}
+        return ({"status": "DebuggerQuit"}, False)
     
     def handle_run(self, args, optional_args):
         byte_args = []
         for arg in optional_args:
             byte_args.append([b for b in arg.encode("utf-8")])
-        return {"status": {"Run": [args.path, byte_args]}}
+        return ({"status": {"Run": [args.path, byte_args]}}, True)
     
     def handle_set_breakpoint(self, args, optional_args):
-        return {"status": {"SetBreakpoint": args.addr}}
+        return ({"status": {"SetBreakpoint": args.addr}}, True)
     
     def handle_delete_breakpoint(self, args, optional_args):
-        return {"status": {"DelBreakpoint": args.addr}}
+        return ({"status": {"DelBreakpoint": args.addr}}, True)
     
     def handle_read_memory(self, args, optional_args):
-        return {"status": {"ReadMem": args.addr}}
+        return ({"status": {"ReadMem": args.addr}}, False)
     
     def handle_write_memory(self, args, optional_args):
-        return {"status": {"WriteMem": [args.addr, args.value]}}
+        return ({"status": {"WriteMem": [args.addr, args.value]}}, True)
     
     def handle_get_set_registers(self, args, optional_args):
         if args.action == "get":
-            return {"status": "DumpRegisters"}
+            return ({"status": "DumpRegisters"}, False)
         else:
             if len(args.options) == 2:
                 try:
-                    return {"status": {"SetRegister": [args.options[0], int(args.options[1])]}}
+                    return ({"status": {"SetRegister": [args.options[0], int(args.options[1])]}}, True)
                 except ValueError:
                     pass
             return self.handle_unknown(args, optional_args)
         
     def handle_get_symbol(self, args, optional_args):
-        return {"status": {"GetSymbolsByName": args.name}}
+        return ({"status": {"GetSymbolsByName": args.name}}, False)
 
     def handle_get_disassembly(self, args, optional_args):
-        return {"status": {"DisassembleAt": [args.addr, args.length, False]}}
+        return ({"status": {"DisassembleAt": [args.addr, args.length, False]}}, False)
     
     def handle_get_variable(self, args, optional_args):
-        return {"status": {"ReadVariable": args.name}}
+        return ({"status": {"ReadVariable": args.name}}, False)
     
     def handle_set_variable(self, args, optional_args):
-        return {"status": {"ReadVariable": [args.name, args.value]}}
+        return ({"status": {"ReadVariable": [args.name, args.value]}}, True)
 
     # No subcommand matched
     def handle_unknown(self, args, optional_args):
-        result_dict = {
+        result_dict = ({
             "feedback": {
                 "Error": {
                     "error_type": "command",
                     "message": f"Unknown command: {args.command}"
                 }
             }
-        }
+        }, False)
         return result_dict

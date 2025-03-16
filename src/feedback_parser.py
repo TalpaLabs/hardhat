@@ -14,18 +14,22 @@ class FeedbackParser:
 
         feedback_data = feedback_dict["feedback"]
         if feedback_data == "Ok":
-            return
-
-        parsed_messages = []
+            return True
 
         for keyword, payload in feedback_data.items():
-            if keyword == "Registers":
-                self._parse_registers(payload)
+            if keyword == "Error":
+                return self._parse_error(payload)
+            elif keyword == "Registers":
+                return self._parse_registers(payload)
             elif keyword == "Stack":
-                self._parse_stack(payload)
+                return self._parse_stack(payload)
             else:
                 # Default fallback if the keyword is unknown
                 self.data_store.set_responses_coreminer(f"Unknown feedback key '{keyword}' -> {payload}")
+                return False
+            
+    def _parse_error(self, register_dict):
+        return False
 
     def _parse_registers(self, registers_dict):
         """
@@ -38,7 +42,7 @@ class FeedbackParser:
             lines.append(f"  {reg_name}: {reg_value:0x}")
 
         self.data_store.set_registers("\n".join(lines))
-        return 
+        return True
     
     def _parse_stack(self, stack_dict):
         """
@@ -53,4 +57,4 @@ class FeedbackParser:
             lines.append(f"  {start_addr:016x}: {word:016x}")
             start_addr += 8
         self.data_store.set_stack("\n".join(lines))
-        return 
+        return True
