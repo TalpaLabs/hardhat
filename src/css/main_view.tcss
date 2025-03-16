@@ -1,20 +1,20 @@
 Screen {
     layout: grid;
-    grid-size: 12 13;
+    grid-size: 13 13;
 }
 
 .main_window {
-    column-span: 6;
+    column-span: 5;
     row-span: 12;
 }
 
 .medium_window {
-    column-span: 6;
+    column-span: 8;
     row-span: 7;
 }
 
 .small_window {
-    column-span: 3;
+    column-span: 4;
     row-span: 5;
 }
 

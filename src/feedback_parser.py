@@ -21,8 +21,8 @@ class FeedbackParser:
         for keyword, payload in feedback_data.items():
             if keyword == "Registers":
                 self._parse_registers(payload)
-            elif keyword == "ProcMap":
-                parsed_messages.append(self._parse_procmap(payload))
+            elif keyword == "Stack":
+                self._parse_stack(payload)
             else:
                 # Default fallback if the keyword is unknown
                 self.data_store.set_responses_coreminer(f"Unknown feedback key '{keyword}' -> {payload}")
@@ -35,7 +35,22 @@ class FeedbackParser:
         """
         lines = []
         for reg_name, reg_value in registers_dict.items():
-            lines.append(f"  {reg_name}: {reg_value}")
+            lines.append(f"  {reg_name}: {reg_value:0x}")
 
         self.data_store.set_registers("\n".join(lines))
+        return 
+    
+    def _parse_stack(self, stack_dict):
+        """
+        Turn something like:
+           {"cs": 51, "ds": 0, "eflags": 512, ...}
+        into a readable multiline string.
+        """
+        start_addr = stack_dict["start_addr"]
+        words = stack_dict["words"]
+        lines = []
+        for word in words:
+            lines.append(f"  {start_addr:016x}: {word:016x}")
+            start_addr += 8
+        self.data_store.set_stack("\n".join(lines))
         return 
