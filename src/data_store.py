@@ -52,3 +52,9 @@ class DataStore:
     
     def get_disassembly(self) -> str:
         return self.disassembly
+    
+    def set_rip(self, response: str) -> None:
+        self.rip = response
+
+    def get_rip(self) -> str:
+        return self.rip

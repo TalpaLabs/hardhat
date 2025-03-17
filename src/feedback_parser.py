@@ -35,6 +35,8 @@ class FeedbackParser:
         lines = []
         for reg_name, reg_value in registers_dict.items():
             lines.append(f"  {reg_name}: {reg_value:0x}")
+            if reg_name == "rip":
+                self.data_store.set_rip(reg_value)
 
         self.data_store.set_registers("\n".join(lines))
         return True
