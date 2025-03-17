@@ -61,7 +61,7 @@ class FeedbackParser:
         - Breakpoint marker (if True)
         """
 
-        ADDRESS_COL_WIDTH = 20
+        ADDRESS_COL_WIDTH = 21
         BYTES_COL_WIDTH   = 22
         MNEMONIC_COL_WIDTH = 8
 
@@ -75,9 +75,9 @@ class FeedbackParser:
             # 1) Format address as hex, left-justify in a fixed width
             # Add (*) if there is a breakpoint in the line
             if has_breakpoint:
-                address_str = f"{address:016x}(*):"
+                address_str = f"{address:016x}(*)"
             else:
-                address_str = f"{address:016x}:"
+                address_str = f"{address:016x}"
             address_col = f"{address_str:<{ADDRESS_COL_WIDTH}}"
 
             # 2) Convert bytes to something like "48 89 e7"
