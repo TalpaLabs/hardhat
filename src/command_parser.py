@@ -1,5 +1,6 @@
 import argparse
 import shlex
+import shutil
 
 class CommandParser():
    
@@ -181,10 +182,12 @@ class CommandParser():
         return ({"status": "DebuggerQuit"}, False)
     
     def handle_run(self, args, optional_args):
+        full_path = shutil.which(args.path) or args.path
+
         byte_args = []
         for arg in optional_args:
             byte_args.append([b for b in arg.encode("utf-8")])
-        return ({"status": {"Run": [args.path, byte_args]}}, True)
+        return ({"status": {"Run": [full_path, byte_args]}}, True)
     
     def handle_set_breakpoint(self, args, optional_args):
         return ({"status": {"SetBreakpoint": args.addr}}, True)
