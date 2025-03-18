@@ -98,9 +98,11 @@ class CoreMinerProcess:
                     self.queue_commands.get() 
                 self.command_finished = True
                 return True
+        
+        # Check for Output
         if not self.queue_output.empty():
             output = self.queue_output.get()
-            self.data_store.set_debuggee_output(output)
+            self.data_store.set_debuggee_output("Debuggee: " + output)
             if self.queue_output.empty():
                 return True
         return False

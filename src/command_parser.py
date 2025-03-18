@@ -157,7 +157,7 @@ class CommandParser():
         return ({"status": "ProcMap"}, False)
     
     def handle_backtarce(self, args, optional_args):
-        return ({"status": "BackTrace"}, False)
+        return ({"status": "Backtrace"}, False)
     
     def handle_continue(self, args, optional_args):
         return ({"status": "Continue"}, True)
