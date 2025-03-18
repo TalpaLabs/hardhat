@@ -130,12 +130,11 @@ class CommandParser():
     def parse(self, input_string: str):
         tokens = shlex.split(input_string)
 
-        for i, token in enumerate(tokens):
-            if token.startswith("0x"):
-                try:
-                    tokens[i] = str(int(token, 16))
-                except ValueError:
-                    pass
+        for i, token in enumerate(tokens[1:], start=1):
+            try:
+                tokens[i] = str(int(token, 16))
+            except ValueError:
+                pass
         
         try:
             args, optional_args = self.parser.parse_known_args(tokens)
