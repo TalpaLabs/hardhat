@@ -1,6 +1,7 @@
 import argparse
 import shlex
 import shutil
+import os
 
 class CommandParser():
    
@@ -30,10 +31,10 @@ class CommandParser():
         step_into_parser = subparsers.add_parser("stepinto", aliases=["si"], help="Performs step into")
 
         # Step single
-        step_single_parser = subparsers.add_parser("steepsingle", aliases=["step", "s"], help="Performs single step")
+        step_single_parser = subparsers.add_parser("step", aliases=["s"], help="Performs single step")
 
         # Get Stack
-        get_stack_parser = subparsers.add_parser("getstack", aliases=["stack"], help="Gets the current stack")
+        get_stack_parser = subparsers.add_parser("stack", aliases=[], help="Gets the current stack")
 
         # Quit
         quit_parser = subparsers.add_parser("quit", aliases=["exit", "q"], help="Quits HardHat")
@@ -44,11 +45,11 @@ class CommandParser():
         run_parser.add_argument("options", nargs="*", help="Optional arguments for running the binary")
 
         # Set breakepoint
-        set_breakpoint_parser = subparsers.add_parser("setbreakpoint", aliases=["break", "bp"], help="Set a breakpoint")
+        set_breakpoint_parser = subparsers.add_parser("break", aliases=["bp"], help="Set a breakpoint")
         set_breakpoint_parser.add_argument("addr", type=int, help="address where to set the breakpoint")
 
         # Del breakepoint
-        set_breakpoint_parser = subparsers.add_parser("delbreakpoint", aliases=["delbreak", "dbp"], help="Deletes a breakpoint")
+        set_breakpoint_parser = subparsers.add_parser("delbreak", aliases=["dbp"], help="Deletes a breakpoint")
         set_breakpoint_parser.add_argument("addr", type=int, help="address where to delete the breakpoint")
 
         # Read memory
@@ -178,7 +179,6 @@ class CommandParser():
         return ({"status": "GetStack"}, False)
     
     def handle_quit(self, args, optional_args):
-        # Todo 
         return ({"status": "DebuggerQuit"}, False)
     
     def handle_run(self, args, optional_args):

@@ -1,16 +1,23 @@
-WidgetSelector {
+HelpMenu {
     align: center middle;
     grid-size: 10 10;
 }
 
 #dialog {
     grid-size: 1 10;
-    column-span: 4;
+    column-span: 6;
     row-span: 7;
     padding: 1 2;
     border: thick $background 80%;
     background: $surface;
     content-align: center middle;
+}
+
+#scroll_container {
+    row-span: 8;
+    text-align: center;
+    width: 100%;
+    text-style: bold;
 }
 
 #selector_title {
@@ -20,29 +27,13 @@ WidgetSelector {
     text-style: bold;
 }
 
-#widget_list {
+#help_text {
     width: 100%;
     margin: 1;
     row-span: 7;
 }
 
-ListItem {
-    text-align: center;
-    padding: 1;
-    height: 3;
-}
-
-ListItem:hover {
-    background: purple;
-    color: black;
-    text-style: bold;
-}
-
-ListItem:focus {
-    border: thick purple;
-}
-
-#cancel {
+#close_button {
     width: 100%;
     row-span: 2;
 }
