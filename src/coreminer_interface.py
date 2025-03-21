@@ -2,6 +2,8 @@ import subprocess
 import json
 import threading
 from queue import Queue
+import atexit
+import os
 
 # Import parser logic
 from command_parser import CommandParser
@@ -17,6 +19,8 @@ class CoreMinerProcess:
             stderr=subprocess.PIPE, 
             text=True
         )
+
+        atexit.register(lambda: self.process.terminate())
 
         self.data_store = data_store
         self.command_finished = True
