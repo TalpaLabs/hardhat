@@ -57,6 +57,8 @@ class FeedbackParser:
                 return self._parse_variable(payload)
             elif keyword == "PluginList":
                 return self._parse_plugin_list(payload)
+            elif keyword == "Exit":
+                return self._parse_exit(payload)
             else:
                 # Default fallback if the keyword is unknown
                 self.data_store.set_responses_coreminer(f"Unknown feedback key '{keyword}' -> {payload}")
@@ -72,7 +74,7 @@ class FeedbackParser:
         Returns:
             bool: False, indicating that the feedback represents an error.
         """
-        self.data_store.set_debuggee_output(f"CoreMiner [Error]: {error_dict}")
+        self.data_store.set_output(f"CoreMiner [Error]: {error_dict}")
         return False
 
     def _parse_registers(self, registers_dict):
@@ -384,3 +386,16 @@ class FeedbackParser:
         output = "\n".join(output_lines)
         self.data_store.set_output("CoreMiner:\n" + output)
         return True
+    
+    def _parse_exit(self, exit_code):
+        """
+        Parse exit code
+
+        Args:
+            exitcode (int): exit code
+
+        Returns:
+            bool: True, indicating successful parsing of plugin list feedback.
+        """
+        self.data_store.set_output("CoreMiner: Debuggee exited with code " + str(exit_code))
+        return False

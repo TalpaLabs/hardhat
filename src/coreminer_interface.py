@@ -160,6 +160,13 @@ class CoreMinerProcess:
         Returns:
             bool: True if a response (feedback or output) was processed and the command is finished, False otherwise.
         """
+        # Check for non-JSON output from the debuggee
+        while not self.queue_output.empty():
+            output = self.queue_output.get()
+            self.data_store.set_output("Debuggee: " + output)
+            if self.queue_output.empty():
+                return True
+
         if not self.queue_feedback.empty():
             feedback = self.queue_feedback.get()
             executed_successfull = self.feedback_parser.parse_feedback(feedback)
@@ -171,13 +178,6 @@ class CoreMinerProcess:
                 while not self.queue_commands.empty():
                     self.queue_commands.get() 
                 self.command_finished = True
-                return True
-        
-        # Check for non-JSON output from the debuggee
-        if not self.queue_output.empty():
-            output = self.queue_output.get()
-            self.data_store.set_debuggee_output("Debuggee: " + output)
-            if self.queue_output.empty():
                 return True
         return False
 
