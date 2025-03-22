@@ -4,7 +4,13 @@ from textual.containers import Grid, ScrollableContainer, VerticalScroll
 from textual.widgets import Button, Static
 
 class HelpMenu(ModalScreen[str]):
-    """Modal popup for showing the help menu."""
+    """
+    This modal popup screen displays usage instructions for the supported commands in an interactive help menu.
+
+    Attributes:
+        CSS_PATH (str): Path to the CSS stylesheet for styling the help menu.
+        USAGE_TEXT (str): Multiline string containing detailed usage instructions for available commands.
+    """
     
     CSS_PATH = "../css/help_menu.tcss"
 
@@ -33,7 +39,13 @@ class HelpMenu(ModalScreen[str]):
     """
 
     def compose(self) -> ComposeResult:
-        # You can layout your widgets however you like
+        """
+        Compose the layout of the help menu modal screen. It uses a grid layout
+        to enable making the modal look like a pupup.
+
+        Returns:
+            ComposeResult: A generator yielding the widgets that make up the modal's user interface.
+        """
         yield Grid(
             Static("Help Menu:", id="selector_title"),
             ScrollableContainer(
@@ -47,5 +59,8 @@ class HelpMenu(ModalScreen[str]):
         )
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
+        """
+        This method listens for button press events. When the close button is pressed, it closes the modal.
+        """
         if event.button.id == "close_button":
             self.app.pop_screen()

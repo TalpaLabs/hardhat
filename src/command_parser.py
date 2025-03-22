@@ -1,11 +1,38 @@
+"""
+Module for parsing and handling debugger commands in the HardHat application.
+
+This module defines the CommandParser class, which leverages the argparse module to create
+a command-line interface for various debugger operations. It maps commands (and their aliases)
+to corresponding handler functions that return the appropriate status messages and flags.
+Additionally, the module provides a helper function, str2bool, for converting string inputs
+to boolean values.
+"""
+
 import argparse
 import shlex
 import shutil
 import os
 
 class CommandParser():
+    """
+    A command parser for the HardHat debugger application.
+
+    This class sets up an argparse-based parser with subcommands for various debugging operations,
+    such as viewing the process map, backtrace, controlling execution, managing breakpoints,
+    reading/writing memory, manipulating registers, disassembly, variable access, and plugin management.
+    It also maintains a mapping between command names (including aliases) and their corresponding
+    handler methods.
+    """
    
     def __init__(self):
+        """
+        Initialize the CommandParser.
+
+        Creates the main argument parser and configures subparsers for each supported command,
+        along with their arguments and help messages. Also, stores the formatted help text and
+        sets up a dictionary mapping command names to their respective handler methods.
+        """
+
         # Create the main (top-level) parser
         self.parser = argparse.ArgumentParser(prog="HardHat")
 
@@ -140,6 +167,21 @@ class CommandParser():
         return self.help_text
 
     def parse(self, input_string: str):
+        """
+        Parse an input command string and dispatch it to the appropriate handler.
+
+        This method tokenizes the input string, attempts to convert tokens (except the command itself)
+        from hexadecimal to decimal when applicable, and parses the tokens using argparse. If the parsing
+        fails due to an unknown command, it returns an error feedback. Otherwise, the method calls the
+        associated command handler and returns its result.
+
+        Args:
+            input_string (str): The raw command string entered by the user.
+
+        Returns:
+            tuple: A tuple containing a dictionary with the command status or error feedback, and a boolean
+                   flag indicating whether basic information need to be updated like register or the stack.
+        """
         tokens = shlex.split(input_string)
 
         for i, token in enumerate(tokens[1:], start=1):
@@ -192,12 +234,10 @@ class CommandParser():
     #    return ({"status": "DebuggerQuit"}, False)
     
     def handle_run(self, args, optional_args):
-        full_path = shutil.which(args.path) or args.path
-
         byte_args = []
         for arg in optional_args:
             byte_args.append([b for b in arg.encode("utf-8")])
-        return ({"status": {"Run": [full_path, byte_args]}}, True)
+        return ({"status": {"Run": [args.path, byte_args]}}, True)
     
     def handle_set_breakpoint(self, args, optional_args):
         return ({"status": {"SetBreakpoint": args.addr}}, True)
