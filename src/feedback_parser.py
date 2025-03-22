@@ -33,6 +33,8 @@ class FeedbackParser:
                 return self._parse_symbols(payload)
             elif keyword == "Variable":
                 return self._parse_variable(payload)
+            elif keyword == "PluginList":
+                return self._parse_plugin_list(payload)
             else:
                 # Default fallback if the keyword is unknown
                 self.data_store.set_responses_coreminer(f"Unknown feedback key '{keyword}' -> {payload}")
@@ -277,5 +279,22 @@ class FeedbackParser:
         output = f"Variable: {hex_bytes}"
         
         # Send the output to the data store
+        self.data_store.set_debuggee_output("CoreMiner:\n" + output)
+        return True
+    
+    def _parse_plugin_list(self, plugin_list_payload):
+        """
+        Parse the plugin list and format it for display.
+        Expects plugin_list_payload to be a list of [plugin_name, active] pairs.
+        """
+        output_lines = ["   Plugins:"]
+        for entry in plugin_list_payload:
+            if isinstance(entry, list) and len(entry) == 2:
+                plugin_name, active = entry
+                status = "activated" if active else "deactivated"
+                output_lines.append(f"      - {plugin_name}: {status}")
+            else:
+                output_lines.append(f"      - Invalid entry: {entry}")
+        output = "\n".join(output_lines)
         self.data_store.set_debuggee_output("CoreMiner:\n" + output)
         return True
