@@ -1,5 +1,5 @@
 [project]
-name = "HardHat"      
+name = "HardHat"
 version = "0.1.0"
 description = "python user interface for coreminer"
 authors = [{ name = "Christoph J. Scherr" }, { name = "Marco Ludwig" }]
@@ -7,18 +7,17 @@ authors = [{ name = "Christoph J. Scherr" }, { name = "Marco Ludwig" }]
 requires-python = ">=3.13"
 
 dependencies = [
-    "textual",
-    "json",
-    "argparse",
-    "typing",
-    "shelx",
-    "threading",
-    "subprocess",
-    "queue",
-    "atexit",
+	"textual",
+	"json",
+	"argparse",
+	"typing",
+	"shelx",
+	"threading",
+	"subprocess",
+	"queue",
+	"atexit",
 ]
 
 [project.optional-dependencies]
 # development dependency groups
 dev = ["textual-dev"]
-
