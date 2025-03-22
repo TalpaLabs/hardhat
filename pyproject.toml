@@ -6,7 +6,6 @@ authors = [{ name = "Christoph J. Scherr" }, { name = "Marco Ludwig" }]
 
 requires-python = ">=3.13"
 
-=======
 dependencies = [
     "textual",
     "json",

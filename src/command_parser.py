@@ -234,8 +234,8 @@ class CommandParser():
     def handle_run(self, args, optional_args):
         byte_args = []
         for arg in optional_args:
-            byte_args.append([b for b in arg.encode("utf-8")])
-        return ({"status": {"Run": [args.path, byte_args]}}, True)
+            byte_args.append(f"{arg}")
+        return ({"status": {"Run": [f"{args.path}", byte_args]}}, True)
     
     def handle_set_breakpoint(self, args, optional_args):
         return ({"status": {"SetBreakpoint": args.addr}}, True)
