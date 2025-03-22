@@ -28,6 +28,8 @@ class HelpMenu(ModalScreen[str]):
     sym, gsym NAME          - Look up symbol by name
     var NAME                - Read variable value
     vars NAME VAL           - Write value to variable
+    plugins                 - Get a List of all available plugins
+    plugin NAME BOOL        - Activate or deactivate a plugin
     """
 
     def compose(self) -> ComposeResult:
@@ -40,7 +42,7 @@ class HelpMenu(ModalScreen[str]):
                 ),
                 id="scroll_container",
             ),
-            Button("Close", id="close_button"),
+            Button("Close", variant="primary", id="close_button"),
             id="dialog"
         )
 

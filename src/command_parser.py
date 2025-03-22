@@ -37,7 +37,7 @@ class CommandParser():
         get_stack_parser = subparsers.add_parser("stack", aliases=[], help="Gets the current stack")
 
         # Quit
-        quit_parser = subparsers.add_parser("quit", aliases=["exit", "q"], help="Quits HardHat")
+        #quit_parser = subparsers.add_parser("quit", aliases=["exit", "q"], help="Quits HardHat")
 
         # Run
         run_parser = subparsers.add_parser("run", aliases=[], help="Runs debugee")
@@ -84,6 +84,14 @@ class CommandParser():
         get_variable_parser = subparsers.add_parser("var", aliases=[], help="Get a variable by name")
         get_variable_parser.add_argument("name", type=str, help="name of the variable")
 
+        # Get plugins
+        get_plugins_parser = subparsers.add_parser("plugins", aliases=[], help="Get all available plugins")
+
+        # Enable & disable plugins
+        enable_disable_plugin_parser = subparsers.add_parser("plugin", aliases=[], help="Enable or disable plugins")
+        enable_disable_plugin_parser.add_argument("name", type=str, help="name of the plugin")
+        enable_disable_plugin_parser.add_argument("value", type=str2bool, help="bool to activate or disable plugin")
+
         self.help_text = self.parser.format_help()
 
         self.command_handlers = {
@@ -105,9 +113,9 @@ class CommandParser():
             "s"                 : self.handle_step_single,
             "getstack"          : self.handle_get_stack,
             "stack"             : self.handle_get_stack,
-            "quit"              : self.handle_quit,
-            "exit"              : self.handle_quit,
-            "q"                 : self.handle_quit,
+            #"quit"              : self.handle_quit,
+            #"exit"              : self.handle_quit,
+            #"q"                 : self.handle_quit,
             "run"               : self.handle_run,
             "setbreakpoint"     : self.handle_set_breakpoint,
             "break"             : self.handle_set_breakpoint,
@@ -124,6 +132,8 @@ class CommandParser():
             "d"                 : self.handle_get_disassembly,
             "vars"              : self.handle_set_variable,
             "var"               : self.handle_get_variable,
+            "plugins"           : self.handle_get_plugins,
+            "plugin"            : self.handle_enable_disable_plugin,
         }
 
     def get_help_text(self):
@@ -178,8 +188,8 @@ class CommandParser():
     def handle_get_stack(self, args, optional_args):
         return ({"status": "GetStack"}, False)
     
-    def handle_quit(self, args, optional_args):
-        return ({"status": "DebuggerQuit"}, False)
+    #def handle_quit(self, args, optional_args):
+    #    return ({"status": "DebuggerQuit"}, False)
     
     def handle_run(self, args, optional_args):
         full_path = shutil.which(args.path) or args.path
@@ -223,6 +233,12 @@ class CommandParser():
     
     def handle_set_variable(self, args, optional_args):
         return ({"status": {"ReadVariable": [args.name, args.value]}}, True)
+    
+    def handle_get_plugins(self, args, optional_args):
+        return ({"status": "PluginGetList"}, False)
+    
+    def handle_enable_disable_plugin(self, args, optional_args):
+        return ({"status":{"PluginSetEnable":[args.name, args.value]}}, False)
 
     # No subcommand matched
     def handle_unknown(self, args, optional_args):
@@ -235,3 +251,17 @@ class CommandParser():
             }
         }, False)
         return result_dict
+    
+def str2bool(value: str) -> bool:
+        """
+        Convert a string to a boolean.
+        Accepts 'true', '1', 'false', '0' (case-insensitive).
+        Raises an error if the string is not recognized.
+        """
+        value_lower = value.lower()
+        if value_lower in ('true', '1', 'activate'):
+            return True
+        elif value_lower in ('false', '0', 'deactivate'):
+            return False
+        else:
+            raise argparse.ArgumentTypeError("Boolean value expected. Use 'true', 'false', '1', or '0'.")
