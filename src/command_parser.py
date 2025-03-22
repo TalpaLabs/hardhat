@@ -233,6 +233,8 @@ class CommandParser():
     
     def handle_run(self, args, optional_args):
         byte_args = []
+        for arg in args.options:
+            byte_args.append(f"{arg}")
         for arg in optional_args:
             byte_args.append(f"{arg}")
         return ({"status": {"Run": [f"{args.path}", byte_args]}}, True)
