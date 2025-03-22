@@ -33,7 +33,7 @@ class FeedbackParser:
         self.data_store.set_responses_coreminer(str(feedback_dict))
         feedback_data = feedback_dict["feedback"]
         if feedback_data == "Ok":
-            self.data_store.set_debuggee_output("CoreMiner: Ok")
+            self.data_store.set_output("CoreMiner: Ok")
             return True
 
         for keyword, payload in feedback_data.items():
@@ -264,7 +264,7 @@ class FeedbackParser:
             output_lines.append(f"  {idx}. Address: {addr_str} | Function: {name} | Start: {start_str}")
         
         output = "\n".join(output_lines)
-        self.data_store.set_output("CoreMiner:\n" + output)
+        self.data_store.set_backtrace(output)
         return True
 
     def _parse_read_memory(self, word_value):

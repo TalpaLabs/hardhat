@@ -188,4 +188,5 @@ class CoreMinerProcess:
         """
         self.queue_commands.put((json.dumps({"status": "DumpRegisters"})))
         self.queue_commands.put((json.dumps({"status": "GetStack"})))
+        self.queue_commands.put((json.dumps({"status": "Backtrace"})))
         return

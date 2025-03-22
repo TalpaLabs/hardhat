@@ -36,6 +36,7 @@ from widgets.registers import Registers
 from widgets.stack import Stack
 from widgets.output import Output
 from widgets.disassembly import Disassembly
+from widgets.backtrace import Backtrace
 
 
 class MainView(Screen):
@@ -333,6 +334,8 @@ class MainView(Screen):
             return Output(self.data_store)
         elif widget_name == "Disassembly":
             return Disassembly(self.data_store)
+        elif widget_name == "Backtrace":
+            return Backtrace(self.data_store)
         else:
             return Static(f"Unknown widget: {widget_name}")
 

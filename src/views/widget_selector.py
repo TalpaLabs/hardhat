@@ -56,6 +56,7 @@ class WidgetSelector(ModalScreen[str]):
         list_view.append(ListItem(Static("Disassembly"), id="Disassembly"))
         list_view.append(ListItem(Static("Registers"), id="Registers"))
         list_view.append(ListItem(Static("Stack"), id="Stack"))
+        list_view.append(ListItem(Static("Backtrace"), id="Backtrace"))
         list_view.append(ListItem(Static("RawResponses"), id="RawResponses"))
 
     def on_list_view_selected(self, event: ListView.Selected) -> None:

@@ -27,6 +27,7 @@ class DataStore:
         self.rip = ""
         self.output = ""
         self.disassembly = ""
+        self.backtrace = ""
 
     def set_responses_coreminer(self, response: str) -> None:
         """
@@ -87,3 +88,9 @@ class DataStore:
 
     def get_rip(self) -> str:
         return self.rip
+    
+    def set_backtrace(self, response: str) -> None:
+        self.backtrace = response
+
+    def get_backtrace(self) -> str:
+        return self.backtrace
