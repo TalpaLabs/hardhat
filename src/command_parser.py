@@ -10,8 +10,6 @@ to boolean values.
 
 import argparse
 import shlex
-import shutil
-import os
 
 class CommandParser():
     """

@@ -1,6 +1,6 @@
 [project]
 name = "HardHat"      
-version = "0.0.0"
+version = "0.1.0"
 description = "python user interface for coreminer"
 authors = [
     { name = "Christoph J. Scherr"},
@@ -13,6 +13,12 @@ dependencies = [
     "textual",
     "json",
     "argparse",
+    "typing",
+    "shelx",
+    "threading",
+    "subprocess",
+    "queue",
+    "atexit",
 ]
 
 [project.optional-dependencies]
