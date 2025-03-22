@@ -2,34 +2,55 @@ from typing import Optional
 
 class DataStore:
     """
-    A container for all shared state/data.
-    Widgets can query this to get the information they need.
+    A container for all shared state and data used across the application.
+
+    This class stores information such as responses from CoreMiner, register values, the stack,
+    the instruction pointer (RIP), output messages, and disassembly information. Widgets and other
+    components can query and update this shared data store to reflect the current state of the debuggee.
     """
 
     def __init__(self):
+        """
+        Initialize the DataStore with default empty values.
+
+        Attributes:
+            responses_coreminer (Optional[str]): Stores concatenated responses from CoreMiner. Initialized as None.
+            registers (str): Stores the current register values as a string.
+            stack (str): Stores the current stack as a string.
+            rip (str): Stores the current instruction pointer (RIP) as a string.
+            output (str): Stores debuggee output messages.
+            disassembly (str): Stores disassembly information.
+        """
         self.responses_coreminer: Optional[str] = None
         self.registers = ""
         self.stack = ""
         self.rip = ""
-        self.debuggee_output = ""
-        self.disassembly= ""
+        self.output = ""
+        self.disassembly = ""
+        self.backtrace = ""
 
     def set_responses_coreminer(self, response: str) -> None:
-        """Appends the new response to responses"""
+        """
+        Append a new response from CoreMiner to the stored responses.
+
+        If responses already exist, the new response is appended on a new line.
+        Otherwise, the response is set as the initial value.
+
+        Args:
+            response (str): The response string from CoreMiner to be added.
+        """
         if self.responses_coreminer:
             self.responses_coreminer += f"\n{response}"
         else:
             self.responses_coreminer = response
 
     def get_responses_coreminer(self) -> str:
-        """Retrieve the responses."""
         return self.responses_coreminer
     
     def set_registers(self, response: str) -> None:
         self.registers = response
 
     def get_registers(self) -> str:
-        """Retrieve the Registers."""
         return self.registers
     
     def set_stack(self, response: str) -> None:
@@ -38,14 +59,23 @@ class DataStore:
     def get_stack(self) -> str:
         return self.stack
     
-    def set_debuggee_output(self, response: str) -> None:
-        if self.debuggee_output:
-            self.debuggee_output += f"\n{response}"
-        else:
-            self.debuggee_output = response
+    def set_output(self, response: str) -> None:
+        """
+        Append a new output message to the stored debuggee output.
 
-    def get_debuggee_output(self) -> str:
-        return self.debuggee_output
+        If output already exists, the new message is appended on a new line.
+        Otherwise, the response is set as the initial output.
+
+        Args:
+            response (str): The output message to be added.
+        """
+        if self.output:
+            self.output += f"\n{response}"
+        else:
+            self.output = response
+
+    def get_output(self) -> str:
+        return self.output
     
     def set_disassembly(self, response: str) -> None:
         self.disassembly = response
@@ -58,3 +88,9 @@ class DataStore:
 
     def get_rip(self) -> str:
         return self.rip
+    
+    def set_backtrace(self, response: str) -> None:
+        self.backtrace = response
+
+    def get_backtrace(self) -> str:
+        return self.backtrace

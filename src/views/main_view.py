@@ -1,3 +1,12 @@
+"""
+Module defining the MainView screen for the HardHat application.
+
+This screen provides the primary user interface, including multiple tabbed content areas,
+a command input field, and integration with the CoreMiner process for debugger operations.
+Users can add or remove tabs that host various widgets, enter debugger commands, and view
+live updates from the debuggee.
+"""
+
 from textual.screen import Screen
 from textual.app import ComposeResult
 from textual.events import Key
@@ -15,7 +24,7 @@ from textual.widgets import (
 # Diferent Screens
 from views.widget_selector import WidgetSelector
 
-#Coreminer API
+# Coreminer API
 from coreminer_interface import CoreMinerProcess
 
 # Central Data Store
@@ -27,12 +36,26 @@ from widgets.registers import Registers
 from widgets.stack import Stack
 from widgets.output import Output
 from widgets.disassembly import Disassembly
+from widgets.backtrace import Backtrace
 
 
 class MainView(Screen):
+    """
+    The primary user interface screen for the HardHat application.
+
+    This screen organizes several tabbed content areas, an interactive command input, a header, and a footer.
+    It manages the CoreMiner process for executing debugger commands and updates the display of various widgets
+    that present debuggee data.
+    """
     CSS_PATH = "../css/main_view.tcss"
 
     def __init__(self) -> None:
+        """
+        Initialize the MainView.
+
+        Sets up counters and mappings for tab management, initializes command history storage,
+        and creates the central data store.
+        """
         super().__init__()
         # Keep your tab counters and add_tab_map from earlier
         self.tab_counters = {
@@ -55,7 +78,12 @@ class MainView(Screen):
         self.data_store = DataStore()
 
     def compose(self) -> ComposeResult:
-        """Creates UI layout including an interactive command line at the bottom."""
+        """
+        Creates UI layout including an interactive command line at the bottom.
+
+        Returns:
+            ComposeResult: The layout structure of the MainView.
+        """
         yield Header()
 
         # Main window
@@ -91,18 +119,35 @@ class MainView(Screen):
     # EVENT HANDLERS
     # ─────────────────────────────────────────────────────────────────────────
     def on_mount(self):
-        """Initialize CoreMiner process."""
+        """
+        Initialize CoreMiner process when the MainView is mounted.
+
+        Starts the CoreMiner process with the central data store and sets up a recurring interval
+        to poll for responses from CoreMiner.
+        """
         self.process = CoreMinerProcess(self.data_store)
         self.set_interval(0.1, self.check_coreminer_output)
 
     def check_coreminer_output(self):
-        """Polls CoreMiner for responses."""
+        """
+        Polls CoreMiner for responses.
+
+        If a response is available, the method triggers an update of all widgets.
+        """
         response = self.process.get_response()
         if response:
             self.update_all_widgets()
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
-        """Handle '[+] Add Tab' buttons and any 'delete_*' buttons."""
+        """
+        Handle '[+] Add Tab' buttons and any 'delete_*' buttons.
+
+        For an "add_" button, open the WidgetSelector modal.
+        For a "delete_" button, delete the corresponding tab.
+
+        Args:
+            event (Button.Pressed): The button press event containing the button's ID.
+        """
         button_id = event.button.id
 
         # If it's an "add_" button, open the WidgetSelector modal
@@ -119,8 +164,12 @@ class MainView(Screen):
 
     def on_key(self, event: Key) -> None:
         """
-        Capture Up/Down arrow keys for the command_input
-        to allow cycling through command history.
+        Capture Up/Down arrow keys for the command_input to allow cycling through command history.
+
+        This method only processes the keys if the command_input widget is focused.
+
+        Args:
+            event (Key): The key event.
         """
         # We'll only do this if the command_input is focused
         command_input = self.query_one("#command_input", Input)
@@ -143,7 +192,15 @@ class MainView(Screen):
                 command_input.value = self.command_history[self.history_index]
 
     def on_input_submitted(self, event: Input.Submitted) -> None:
-        """Handle Enter in the command_input, storing commands in history."""
+        """
+        Handle Enter in the command_input, storing commands in history.
+
+        The entered command is processed and sent to the CoreMiner process.
+        After processing, the input is cleared and the history index is updated.
+
+        Args:
+            event (Input.Submitted): The input submission event.
+        """
         if event.input.id == "command_input":
             command = event.value.strip()
             if command:
@@ -155,24 +212,42 @@ class MainView(Screen):
     # LOGIC FOR PROCESSING COMMANDS
     # ─────────────────────────────────────────────────────────────────────────
     def process_command(self, command: str) -> None:
-        """Append Command to history and send """
+        """
+        Append Command to history and send it to the CoreMiner process.
+
+        Args:
+            command (str): The command string entered by the user.
+        """
         self.command_history.append(command)
         self.process.parse_command(command)
         
-
     # ─────────────────────────────────────────────────────────────────────────
     # ADD / DELETE TABS
     # ─────────────────────────────────────────────────────────────────────────
     def _on_widget_choice(self, choice: str | None, tabbed_content_id: str) -> None:
         """
         Called when the user closes the WidgetSelector modal.
-        `choice` is "WidgetA", "WidgetB", "WidgetC", or None if canceled.
+
+        If a valid widget is selected, add a new tab with the widget to the specified tabbed content area.
+
+        Args:
+            choice (str | None): The selected widget name or None if no selection was made.
+            tabbed_content_id (str): The ID of the tabbed content area where the widget should be added.
         """
         if choice is not None:
             self.add_tab(tabbed_content_id, choice)
 
     def add_tab(self, tabbed_content_id: str, widget_name: str) -> None:
-        """Insert a new tab with the chosen widget, before the '[+]' tab."""
+        """
+        Insert a new tab with the chosen widget, before the '[+]' tab.
+
+        Creates a new tab pane with a unique ID, containing the widget wrapped in a scrollable container,
+        along with a "Close Tab" button.
+
+        Args:
+            tabbed_content_id (str): The identifier for the tabbed content area.
+            widget_name (str): The name of the widget to add.
+        """
         if tabbed_content_id not in self.add_tab_map:
             print(f"No such tabbed content: {tabbed_content_id}")
             return
@@ -192,9 +267,9 @@ class MainView(Screen):
         delete_button_id = f"delete_{tabbed_content_id}_{new_tab_id}"
         content_container = ScrollableContainer(
             VerticalScroll(
-            widget
+                widget
             ),
-            Button("Close Tab",  id=delete_button_id),
+            Button("Close Tab", id=delete_button_id),
         )
 
         # Insert before the "[+]" tab
@@ -209,6 +284,9 @@ class MainView(Screen):
         """
         Remove a tab, given the button ID "delete_{tabbed_content_id}_{tab_id}".
         E.g.: "delete_main_tabs_main_tabs_tab_3"
+
+        Args:
+            delete_button_id (str): The identifier of the delete button triggering the tab removal.
         """
         remainder = delete_button_id.removeprefix("delete_")
 
@@ -236,7 +314,16 @@ class MainView(Screen):
     # FACTORY FOR WIDGETS & Udaten the Content
     # ─────────────────────────────────────────────────────────────────────────
     def _create_widget(self, widget_name: str):
-        """Return an instance of the selected widget by name."""
+        """
+        Return an instance of the selected widget by name.
+
+        Args:
+            widget_name (str): The name of the widget to create.
+
+        Returns:
+            Widget: The widget instance corresponding to the provided name,
+                    or a Static widget with an error message if unknown.
+        """
         if widget_name == "RawResponses":
             return RawResponses(self.data_store)
         elif widget_name == "Registers":
@@ -247,6 +334,8 @@ class MainView(Screen):
             return Output(self.data_store)
         elif widget_name == "Disassembly":
             return Disassembly(self.data_store)
+        elif widget_name == "Backtrace":
+            return Backtrace(self.data_store)
         else:
             return Static(f"Unknown widget: {widget_name}")
 
@@ -269,6 +358,5 @@ class MainView(Screen):
 
                 # Inside this tab, find any widget with an update_content() method
                 for child in pane.query():
-                    if hasattr(child, "update") and callable(child.update_content):
+                    if hasattr(child, "update_content") and callable(child.update_content):
                         child.update_content()
-

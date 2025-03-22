@@ -1,13 +1,13 @@
 from textual.widgets import Static
 
-class Registers(Static):
+class Backtrace(Static):
     """
-    A widget that displays the current registers and their corresponding values of the debuggee.
+    A widget that displays the backtrace of the debuggee.
     """
     
     def __init__(self, data_store):
         """
-        Initialize the Registers widget.
+        Initialize the Backtrace widget.
 
         Args:
             data_store: An object that provides register data through the `get_registers` method.
@@ -26,9 +26,9 @@ class Registers(Static):
 
     def update_content(self):
         """
-        Update the widget's content with the latest register values.
+        Update the widget's content with the latest backtrace.
 
-        This method retrieves register data from the data store using the `get_registers` method
+        This method retrieves backtrace data from the data store using the `get_backtrace` method
         and updates the widget's display with this information.
         """
-        self.update(self.data_store.get_registers())
+        self.update(self.data_store.get_backtrace())
