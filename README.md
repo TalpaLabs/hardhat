@@ -32,6 +32,7 @@ HardHat is a powerful Textual User Interface (TUI) for the [Coreminer](https://g
   - **Register view**: CPU register values
   - **Stack view**: Current stack contents
   - **Output view**: Program and debugger output
+  - **Backtrace view**: Current backtrace
   - **Raw responses**: Full JSON data for debugging the debugger itself
 - **Plugin management**: Enable/disable Coreminer plugins directly from the UI
 - **Keyboard navigation**: Efficient workflow with keyboard shortcuts
