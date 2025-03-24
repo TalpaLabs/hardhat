@@ -7,6 +7,7 @@ It also is responsible to send the JSON commands to the CoreMiners stdin. To pas
 JSON feedback it uses the CommandParser and FeedbackParser class.  to handle communication and update the applications data store accordingly.
 """
 
+import time
 import subprocess
 import json
 import threading
@@ -16,6 +17,7 @@ import atexit
 # Import parser logic
 from command_parser import CommandParser
 from feedback_parser import FeedbackParser
+
 
 class CoreMinerProcess:
     """
@@ -36,7 +38,7 @@ class CoreMinerProcess:
         queue_stderr (Queue): Queue for storing stderr messages.
         queue_commands (Queue): Queue for storing JSON commands to send to the process.
     """
-    
+
     def __init__(self, data_store):
         """
         Initialize the CoreMinerProcess instance and launch the CoreMiner subprocess.
@@ -49,10 +51,10 @@ class CoreMinerProcess:
             data_store: An object used to store and update information received from the CoreMiner process.
         """
         self.process = subprocess.Popen(
-            ["cmserve"], 
-            stdin=subprocess.PIPE, 
+            ["cmserve"],
+            stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE, 
+            stderr=subprocess.PIPE,
             text=True
         )
 
@@ -81,6 +83,7 @@ class CoreMinerProcess:
         is interpreted as output from the debuggee and added to the output queue.
         """
         while True:
+            time.sleep(0.01)
             if self.process.stdout:
                 line_stdout = self.process.stdout.readline().strip()
                 if line_stdout:
@@ -98,6 +101,7 @@ class CoreMinerProcess:
         the raw string is added to the stderr queue.
         """
         while True:
+            time.sleep(0.01)
             if self.process.stderr:
                 line_stderr = self.process.stderr.readline().strip()
                 if line_stderr:
@@ -139,12 +143,14 @@ class CoreMinerProcess:
         When both conditions are met, the next command is written to the process's stdin and flushed.
         """
         while True:
+            time.sleep(0.01)
             if self.process.stdin:
                 if not self.queue_commands.empty() and self.command_finished == True:
                     command = self.queue_commands.get()
                     self.process.stdin.write(command + "\n")
                     self.process.stdin.flush()
                     self.command_finished = False
+                    self.data_store.set_responses_coreminer(command)
 
     def get_response(self):
         """
@@ -169,14 +175,15 @@ class CoreMinerProcess:
 
         if not self.queue_feedback.empty():
             feedback = self.queue_feedback.get()
-            executed_successfull = self.feedback_parser.parse_feedback(feedback)
+            executed_successfull = self.feedback_parser.parse_feedback(
+                feedback)
             if executed_successfull:
                 self.command_finished = True
-                if self.queue_commands.empty(): # Only update TUI when the commands queue is empty
+                if self.queue_commands.empty():  # Only update TUI when the commands queue is empty
                     return True
-            else: # command unsuccessfull clear commands queue and send signal TRUE to update content of the widgets  
+            else:  # command unsuccessfull clear commands queue and send signal TRUE to update content of the widgets
                 while not self.queue_commands.empty():
-                    self.queue_commands.get() 
+                    self.queue_commands.get()
                 self.command_finished = True
                 return True
         return False
