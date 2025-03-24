@@ -51,7 +51,7 @@ class CoreMinerProcess:
             data_store: An object used to store and update information received from the CoreMiner process.
         """
         self.process = subprocess.Popen(
-            ["cmserve"],
+            ["cmserve", "--logfile" , "./cmlog.log"],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
