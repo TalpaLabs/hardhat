@@ -124,6 +124,7 @@ class CoreMinerProcess:
         Args:
             command (str): The input command string provided by the user.
         """
+        self.data_store.set_output(f"--> {command}")
         result_dict, reload_basic_info = self.command_parser.parse(command)
         if result_dict:
             # If the parser returned a dict, check for an error and return feedback if present.
@@ -169,8 +170,14 @@ class CoreMinerProcess:
         # Check for non-JSON output from the debuggee
         while not self.queue_output.empty():
             output = self.queue_output.get()
-            self.data_store.set_output("Debuggee: " + output)
+            self.data_store.set_output("[d]: " + output)
             if self.queue_output.empty():
+                return True
+            
+        while not self.queue_stderr.empty():
+            output = self.queue_stderr.get()
+            self.data_store.set_output("[d][!]: " + output)
+            if self.queue_stderr.empty():
                 return True
 
         if not self.queue_feedback.empty():

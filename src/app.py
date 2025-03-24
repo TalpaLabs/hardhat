@@ -45,7 +45,7 @@ class HardHat(App):
 
         # Add our own custom command
         yield SystemCommand(
-            "Help Menue",
+            "Help Menu",
             "Open HardHat usage / help screen",
             self.show_commands_help,
         )

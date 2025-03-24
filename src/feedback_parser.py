@@ -33,7 +33,7 @@ class FeedbackParser:
         self.data_store.set_responses_coreminer(str(feedback_dict))
         feedback_data = feedback_dict["feedback"]
         if feedback_data == "Ok":
-            self.data_store.set_output("CoreMiner: Ok")
+            self.data_store.set_output("[cm]: Ok")
             return True
 
         for keyword, payload in feedback_data.items():
@@ -77,7 +77,7 @@ class FeedbackParser:
         Returns:
             bool: False, indicating that the feedback represents an error.
         """
-        self.data_store.set_output(f"CoreMiner [Error]: {error_dict}")
+        self.data_store.set_output(f"[cm][!]: {error_dict}")
         return False
 
     def _parse_registers(self, registers_dict):
@@ -242,7 +242,7 @@ class FeedbackParser:
             )
 
         output = "\n".join(output_lines)
-        self.data_store.set_output("CoreMiner:\n" + "ProcessMap: \n" + output)
+        self.data_store.set_output("[cm]:\n" + "ProcessMap: \n" + output)
         return True
 
     def _parse_backtrace(self, backtrace_dict):
@@ -289,7 +289,7 @@ class FeedbackParser:
         except (ValueError, TypeError):
             hex_word = "Invalid word value"
 
-        self.data_store.set_output("CoreMiner:\n" + f"Memory word: {hex_word}")
+        self.data_store.set_output("[cm]:\n" + f"Memory word: {hex_word}")
         return True
 
     def _parse_symbols(self, symbols):
@@ -310,7 +310,7 @@ class FeedbackParser:
             output_lines.extend(self.format_symbols(symbol))
 
         output = "\n".join(output_lines)
-        self.data_store.set_output("CoreMiner:\n" + output)
+        self.data_store.set_output("[cm]:\n" + output)
         return True
 
     def format_symbols(self, symbol, indent=0):
@@ -365,7 +365,7 @@ class FeedbackParser:
         bytes_list = variable_dict.get("Bytes", [])
         hex_bytes = " ".join(f"{b:02x}" for b in bytes_list)
         output = f"Variable: {hex_bytes}"
-        self.data_store.set_output("CoreMiner:\n" + output)
+        self.data_store.set_output("[cm]:\n" + output)
         return True
 
     def _parse_plugin_list(self, plugin_list_payload):
@@ -390,7 +390,7 @@ class FeedbackParser:
             else:
                 output_lines.append(f"      - Invalid entry: {entry}")
         output = "\n".join(output_lines)
-        self.data_store.set_output("CoreMiner:\n" + output)
+        self.data_store.set_output("[cm]:\n" + output)
         return True
 
     def _parse_exit(self, exit_code):
@@ -404,7 +404,7 @@ class FeedbackParser:
             bool: True, indicating successful parsing of plugin list feedback.
         """
         self.data_store.set_output(
-            "CoreMiner: Debuggee exited with code " + str(exit_code))
+            "[cm]: Debuggee exited with code " + str(exit_code))
         return False
 
     def _parse_version(self, payload):
@@ -420,5 +420,5 @@ class FeedbackParser:
             bool: True, indicating successful parsing of version string
         """
         self.data_store.set_output(
-            "version: " + str(payload))
+            "[cm]: version: " + str(payload))
         return True

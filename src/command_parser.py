@@ -71,8 +71,8 @@ class CommandParser():
         get_stack_parser = subparsers.add_parser(
             "stack", aliases=[], help="Gets the current stack")
 
-        # Get Stack
-        metadata_parser = subparsers.add_parser(
+        # Get version
+        version_parser = subparsers.add_parser(
             "version", aliases=[], help="Gets metadata about hardhat and coreminer")
 
         # Quit
@@ -159,9 +159,6 @@ class CommandParser():
             "name", type=str, help="name of the plugin")
         enable_disable_plugin_parser.add_argument(
             "value", type=str2bool, help="bool to activate or disable plugin")
-
-        set_variable_parser.add_argument(
-            "value", action="store_true", help="value to set to")
 
         self.help_text = self.parser.format_help()
 
