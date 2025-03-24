@@ -270,12 +270,12 @@ class CommandParser():
     #    return ({"status": "DebuggerQuit"}, False)
 
     def handle_run(self, args, optional_args):
-        optional_args = []
+        add_args = []
         for arg in args.options:
-            optional_args.append(f"{arg}")
+            add_args.append(f"{arg}")
         for arg in optional_args:
-            optional_args.append(f"{arg}")
-        return ({"status": {"Run": [f"{args.path}", optional_args]}}, True)
+            add_args.append(f"{arg}")
+        return ({"status": {"Run": [f"{args.path}", add_args]}}, True)
 
     def handle_set_breakpoint(self, args, optional_args):
         return ({"status": {"SetBreakpoint": args.addr}}, True)
@@ -357,5 +357,4 @@ def str2bool(value: str) -> bool:
 
 
 def parse_hex(input: str) -> int:
-    # TODO: strip 0x prefix
     return int(input, 16)
