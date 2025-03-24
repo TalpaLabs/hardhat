@@ -134,7 +134,7 @@ plugins            # List all plugins
 plugin sigtrap_guard true  # Enable a plugin
 ```
 
-Press F1 or click "Help Menu" in the command palette (Ctrl+/) to see all available commands.
+Press CTRL + P to open the command palette and click "Help Menu" to see all available commands.
 
 ## Architecture
 
