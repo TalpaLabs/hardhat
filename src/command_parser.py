@@ -90,27 +90,27 @@ class CommandParser():
         set_breakpoint_parser = subparsers.add_parser(
             "break", aliases=["bp"], help="Set a breakpoint")
         set_breakpoint_parser.add_argument(
-            "addr", type=int, help="address where to set the breakpoint")
+            "addr", type=parse_hex, help="address where to set the breakpoint")
 
         # Del breakepoint
         set_breakpoint_parser = subparsers.add_parser(
             "delbreak", aliases=["dbp"], help="Deletes a breakpoint")
         set_breakpoint_parser.add_argument(
-            "addr", type=int, help="address where to delete the breakpoint")
+            "addr", type=parse_hex, help="address where to delete the breakpoint")
 
         # Read memory
         read_memory_parser = subparsers.add_parser(
             "rmem", aliases=[], help="Read a word at addr")
         read_memory_parser.add_argument(
-            "addr", type=int, help="address where you want to read a word")
+            "addr", type=parse_hex, help="address where you want to read a word")
 
         # Write memory
         write_memory_parser = subparsers.add_parser(
             "wmem", aliases=[], help="Write a word at addr")
         write_memory_parser.add_argument(
-            "addr", type=int, help="address where you want to write a word")
+            "addr", type=parse_hex, help="address where you want to write a word")
         write_memory_parser.add_argument(
-            "value", type=int, help="value you want to write")
+            "value", type=parse_hex, help="value you want to write")
 
         # Get & Set regs
         get_set_regs_parser = subparsers.add_parser(
@@ -130,9 +130,9 @@ class CommandParser():
         get_disassembly_parser = subparsers.add_parser(
             "dis", aliases=["d"], help="Disassemble at address")
         get_disassembly_parser.add_argument(
-            "addr", type=int, help="address where you want to disassemble")
+            "addr", type=parse_hex, help="address where you want to disassemble")
         get_disassembly_parser.add_argument(
-            "length", type=int, help="bytes you want to disassemble")
+            "length", type=parse_hex, help="bytes you want to disassemble")
 
         # Set variable
         set_variable_parser = subparsers.add_parser(
@@ -140,7 +140,7 @@ class CommandParser():
         set_variable_parser.add_argument(
             "name", type=str, help="name of the variable")
         set_variable_parser.add_argument(
-            "value", type=int, help="value to set to")
+            "value", type=parse_hex, help="value to set to")
 
         # Get variable
         get_variable_parser = subparsers.add_parser(
@@ -278,16 +278,16 @@ class CommandParser():
         return ({"status": {"Run": [f"{args.path}", optional_args]}}, True)
 
     def handle_set_breakpoint(self, args, optional_args):
-        return ({"status": {"SetBreakpoint": int(args.addr, 16)}}, True)
+        return ({"status": {"SetBreakpoint": args.addr}}, True)
 
     def handle_delete_breakpoint(self, args, optional_args):
-        return ({"status": {"DelBreakpoint": int(args.addr, 16)}}, True)
+        return ({"status": {"DelBreakpoint": args.addr}}, True)
 
     def handle_read_memory(self, args, optional_args):
-        return ({"status": {"ReadMem": int(args.addr, 16)}}, False)
+        return ({"status": {"ReadMem": args.addr}}, False)
 
     def handle_write_memory(self, args, optional_args):
-        return ({"status": {"WriteMem": [int(args.addr, 16), int(args.value, 16)]}}, True)
+        return ({"status": {"WriteMem": [args.addr, args.value]}}, True)
 
     def handle_get_set_registers(self, args, optional_args):
         if args.action == "get":
@@ -295,7 +295,7 @@ class CommandParser():
         else:
             if len(args.options) == 2:
                 try:
-                    return ({"status": {"SetRegister": [args.options[0], int(args.options[1], 16)]}}, True)
+                    return ({"status": {"SetRegister": [args.options[0], args.options[1]]}}, True)
                 except ValueError:
                     pass
             return self.handle_unknown(args, optional_args)
@@ -304,13 +304,13 @@ class CommandParser():
         return ({"status": {"GetSymbolsByName": args.name}}, False)
 
     def handle_get_disassembly(self, args, optional_args):
-        return ({"status": {"DisassembleAt": [(args.addr, 16), args.length, False]}}, False)
+        return ({"status": {"DisassembleAt": [args.addr, args.length, False]}}, False)
 
     def handle_get_variable(self, args, optional_args):
         return ({"status": {"ReadVariable": args.name}}, False)
 
     def handle_set_variable(self, args, optional_args):
-        return ({"status": {"ReadVariable": [args.name, int(args.value, 16)]}}, True)
+        return ({"status": {"ReadVariable": [args.name, args.value]}}, True)
 
     def handle_get_plugins(self, args, optional_args):
         return ({"status": "PluginGetList"}, False)
@@ -355,3 +355,7 @@ def str2bool(value: str) -> bool:
         raise argparse.ArgumentTypeError(
             "Boolean value expected. Use 'true', 'false', '1', or '0'.")
 
+
+def parse_hex(input: str) -> int:
+    # TODO: strip 0x prefix
+    return int(input, 16)
