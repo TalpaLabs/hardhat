@@ -59,9 +59,12 @@ class FeedbackParser:
                 return self._parse_plugin_list(payload)
             elif keyword == "Exit":
                 return self._parse_exit(payload)
+            elif keyword == "version":
+                return self._parse_version(payload)
             else:
                 # Default fallback if the keyword is unknown
-                self.data_store.set_responses_coreminer(f"Unknown feedback key '{keyword}' -> {payload}")
+                self.data_store.set_responses_coreminer(
+                    f"Unknown feedback key '{keyword}' -> {payload}")
                 return False
 
     def _parse_error(self, error_dict):
@@ -136,14 +139,15 @@ class FeedbackParser:
             bool: True, indicating successful parsing of disassembly feedback.
         """
         ADDRESS_COL_WIDTH = 21
-        BYTES_COL_WIDTH   = 22
+        BYTES_COL_WIDTH = 22
         MNEMONIC_COL_WIDTH = 8
 
         lines = []
         for entry in disasm_dict["vec"]:
-            address       = entry[0]     # e.g. 140180160845120
-            bytes_list    = entry[1]     # e.g. [72, 137, 231]
-            tokens        = entry[2]     # list of dicts with { kind: "...", text: "..." }
+            address = entry[0]     # e.g. 140180160845120
+            bytes_list = entry[1]     # e.g. [72, 137, 231]
+            # list of dicts with { kind: "...", text: "..." }
+            tokens = entry[2]
             has_breakpoint = entry[3]    # True or False
 
             # Format address as hex and mark breakpoint if applicable
@@ -256,15 +260,16 @@ class FeedbackParser:
         """
         frames = backtrace_dict.get("frames", [])
         output_lines = ["Backtrace:"]
-        
+
         for idx, frame in enumerate(frames, start=1):
             addr = frame.get("addr", 0)
             name = frame.get("name") or "<unknown>"
             start_addr = frame.get("start_addr")
             addr_str = f"0x{addr:016x}"
             start_str = f"0x{start_addr:016x}" if start_addr is not None else "N/A"
-            output_lines.append(f"  {idx}. Address: {addr_str} | Function: {name} | Start: {start_str}")
-        
+            output_lines.append(
+                f"  {idx}. Address: {addr_str} | Function: {name} | Start: {start_str}")
+
         output = "\n".join(output_lines)
         self.data_store.set_backtrace(output)
         return True
@@ -283,7 +288,7 @@ class FeedbackParser:
             hex_word = f"0x{int(word_value):016x}"
         except (ValueError, TypeError):
             hex_word = "Invalid word value"
-        
+
         self.data_store.set_output("CoreMiner:\n" + f"Memory word: {hex_word}")
         return True
 
@@ -303,7 +308,7 @@ class FeedbackParser:
         output_lines = ["Symbols:"]
         for symbol in symbols:
             output_lines.extend(self.format_symbols(symbol))
-            
+
         output = "\n".join(output_lines)
         self.data_store.set_output("CoreMiner:\n" + output)
         return True
@@ -321,7 +326,8 @@ class FeedbackParser:
             list: A list of formatted strings representing the symbol and its children.
         """
         indent_str = "  " * indent
-        name = symbol.get("name") if symbol.get("name") is not None else "<anonymous>"
+        name = symbol.get("name") if symbol.get(
+            "name") is not None else "<anonymous>"
         kind = symbol.get("kind", "<unknown>")
         offset = symbol.get("offset")
         datatype = symbol.get("datatype")
@@ -386,7 +392,7 @@ class FeedbackParser:
         output = "\n".join(output_lines)
         self.data_store.set_output("CoreMiner:\n" + output)
         return True
-    
+
     def _parse_exit(self, exit_code):
         """
         Parse exit code
@@ -397,5 +403,22 @@ class FeedbackParser:
         Returns:
             bool: True, indicating successful parsing of plugin list feedback.
         """
-        self.data_store.set_output("CoreMiner: Debuggee exited with code " + str(exit_code))
+        self.data_store.set_output(
+            "CoreMiner: Debuggee exited with code " + str(exit_code))
         return False
+
+    def _parse_version(self, payload):
+        """
+        Parse version
+
+        This is a meta feedback that is not made by the coreminer
+
+        Args:
+            version string
+
+        Returns:
+            bool: True, indicating successful parsing of version string
+        """
+        self.data_store.set_output(
+            "version: " + str(payload))
+        return True
