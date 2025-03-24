@@ -226,12 +226,6 @@ class CommandParser():
         """
         tokens = shlex.split(input_string)
 
-        for i, token in enumerate(tokens[1:], start=1):
-            try:
-                tokens[i] = str(int(token, 16))
-            except ValueError:
-                pass
-
         try:
             args, optional_args = self.parser.parse_known_args(tokens)
         except SystemExit:
@@ -276,24 +270,24 @@ class CommandParser():
     #    return ({"status": "DebuggerQuit"}, False)
 
     def handle_run(self, args, optional_args):
-        byte_args = []
+        optional_args = []
         for arg in args.options:
-            byte_args.append(f"{arg}")
+            optional_args.append(f"{arg}")
         for arg in optional_args:
-            byte_args.append(f"{arg}")
-        return ({"status": {"Run": [f"{args.path}", byte_args]}}, True)
+            optional_args.append(f"{arg}")
+        return ({"status": {"Run": [f"{args.path}", optional_args]}}, True)
 
     def handle_set_breakpoint(self, args, optional_args):
-        return ({"status": {"SetBreakpoint": args.addr}}, True)
+        return ({"status": {"SetBreakpoint": int(args.addr, 16)}}, True)
 
     def handle_delete_breakpoint(self, args, optional_args):
-        return ({"status": {"DelBreakpoint": args.addr}}, True)
+        return ({"status": {"DelBreakpoint": int(args.addr, 16)}}, True)
 
     def handle_read_memory(self, args, optional_args):
-        return ({"status": {"ReadMem": args.addr}}, False)
+        return ({"status": {"ReadMem": int(args.addr, 16)}}, False)
 
     def handle_write_memory(self, args, optional_args):
-        return ({"status": {"WriteMem": [args.addr, args.value]}}, True)
+        return ({"status": {"WriteMem": [int(args.addr, 16), int(args.value, 16)]}}, True)
 
     def handle_get_set_registers(self, args, optional_args):
         if args.action == "get":
@@ -301,7 +295,7 @@ class CommandParser():
         else:
             if len(args.options) == 2:
                 try:
-                    return ({"status": {"SetRegister": [args.options[0], int(args.options[1])]}}, True)
+                    return ({"status": {"SetRegister": [args.options[0], int(args.options[1], 16)]}}, True)
                 except ValueError:
                     pass
             return self.handle_unknown(args, optional_args)
@@ -310,13 +304,13 @@ class CommandParser():
         return ({"status": {"GetSymbolsByName": args.name}}, False)
 
     def handle_get_disassembly(self, args, optional_args):
-        return ({"status": {"DisassembleAt": [args.addr, args.length, False]}}, False)
+        return ({"status": {"DisassembleAt": [(args.addr, 16), args.length, False]}}, False)
 
     def handle_get_variable(self, args, optional_args):
         return ({"status": {"ReadVariable": args.name}}, False)
 
     def handle_set_variable(self, args, optional_args):
-        return ({"status": {"ReadVariable": [args.name, args.value]}}, True)
+        return ({"status": {"ReadVariable": [args.name, int(args.value, 16)]}}, True)
 
     def handle_get_plugins(self, args, optional_args):
         return ({"status": "PluginGetList"}, False)
