@@ -1,4 +1,5 @@
 <div align="center">
+    <img alt="icon" src="./docs/img/logo.png" width="60%"/>
     <h1>HardHat</h1>
     <h3>🔩 HardHat 👷</h3>
     <p>
@@ -8,20 +9,20 @@
     <a href="https://python.org">
         <img src="https://img.shields.io/badge/language-Python-blue.svg" alt="Python"/>
     </a>
-    <a href="https://github.com/debugger-bs/coreminer">
+    <a href="https://github.com/TalpaLabs/coreminer">
         <img src="https://img.shields.io/badge/Requires-Coreminer-red.svg" alt="Requires Coreminer"/>
     </a>
-    <a href="https://github.com/debugger-bs/hardhat/blob/master/LICENSE">
-        <img src="https://img.shields.io/github/license/debugger-bs/hardhat" alt="License"/>
+    <a href="https://github.com/TalpaLabs/hardhat/blob/master/LICENSE">
+        <img src="https://img.shields.io/github/license/TalpaLabs/hardhat" alt="License"/>
     </a>
-    <a href="https://github.com/debugger-bs/hardhat/releases">
-        <img src="https://img.shields.io/github/v/release/debugger-bs/hardhat" alt="Release"/>
+    <a href="https://github.com/TalpaLabs/hardhat/releases">
+        <img src="https://img.shields.io/github/v/release/TalpaLabs/hardhat" alt="Release"/>
     </a>
 </div>
 
 # HardHat
 
-HardHat is a powerful Textual User Interface (TUI) for the [Coreminer](https://github.com/debugger-bs/coreminer) debugger. It provides an intuitive, terminal-based interface that enhances the debugging experience with Coreminer while maintaining the flexibility and power of the command-line.
+HardHat is a powerful Textual User Interface (TUI) for the [Coreminer](https://github.com/TalpaLabs/coreminer) debugger. It provides an intuitive, terminal-based interface that enhances the debugging experience with Coreminer while maintaining the flexibility and power of the command-line.
 
 ## Features
 
@@ -40,14 +41,14 @@ HardHat is a powerful Textual User Interface (TUI) for the [Coreminer](https://g
 ## Requirements
 
 - Python 3.13+
-- [Coreminer](https://github.com/debugger-bs/coreminer) debugger with the `cmserve` binary, at least v0.4.0
+- [Coreminer](https://github.com/TalpaLabs/coreminer) debugger with the `cmserve` binary, at least v0.4.0
 - [Textual](https://textual.textualize.io/getting_started/#installation) library
 
 ## Installation
 
 ### Install Coreminer
 
-HardHat requires the Coreminer debugger to be installed. Follow the Coreminer installation instructions from its [README](https://github.com/debugger-bs/coreminer/blob/master/README.md).
+HardHat requires the Coreminer debugger to be installed. Follow the Coreminer installation instructions from its [README](https://github.com/TalpaLabs/coreminer/blob/master/README.md).
 
 Ensure that `cmserve` is in your PATH after installing Coreminer.
 
@@ -55,7 +56,7 @@ Ensure that `cmserve` is in your PATH after installing Coreminer.
 
 ```bash
 # Clone the repository
-git clone https://github.com/debugger-bs/hardhat.git
+git clone https://github.com/TalpaLabs/hardhat.git
 cd hardhat
 
 # Install dependencies
@@ -164,5 +165,5 @@ Distributed under the MIT License. See the LICENSE file for more information.
 
 ## Acknowledgements
 
-- [Coreminer](https://github.com/debugger-bs/coreminer) - The debugger powering HardHat
+- [Coreminer](https://github.com/TalpaLabs/coreminer) - The debugger powering HardHat
 - [Textual](https://github.com/Textualize/textual) - The TUI framework used to build HardHat
