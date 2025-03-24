@@ -1,4 +1,5 @@
 <div align="center">
+    <img alt="icon" src="./docs/img/logo.png" width="60%"/>
     <h1>HardHat</h1>
     <h3>🔩 HardHat 👷</h3>
     <p>
